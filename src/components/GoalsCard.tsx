@@ -19,6 +19,9 @@ import {
   inputClass,
 } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { RevealList, RevealListItem } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
+import { formatCount } from "@/lib/format";
 
 type GoalType = GoalRecord["type"];
 
@@ -138,7 +141,7 @@ export function GoalsCard({
 
       {progress.length === 0 && !adding && (
         <EmptyState
-          icon="🎯"
+          icon={<Target className="h-6 w-6" aria-hidden />}
           title="No goals set yet"
           description="Add a target split, a meters milestone, or a workouts-per-month streak to track here."
           action={
@@ -151,14 +154,20 @@ export function GoalsCard({
       )}
 
       {progress.length > 0 && (
-        <ul className="space-y-4">
+        <RevealList className="space-y-4">
           {progress.map((g) => (
-            <li key={g.id}>
+            <RevealListItem key={g.id}>
               <div className="mb-1 flex items-center justify-between gap-2 text-sm">
                 <span className="font-medium text-foreground">{g.displayLabel}</span>
                 <div className="flex items-center gap-2">
                   <span className="tabular text-xs text-muted">
-                    {g.progressPct === null ? "No data yet" : `${g.progressPct}%`}
+                    {g.progressPct === null ? (
+                      "No data yet"
+                    ) : (
+                      <>
+                        <CountUp value={g.progressPct} format={formatCount} />%
+                      </>
+                    )}
                   </span>
                   <IconButton
                     label="Remove goal"
@@ -173,7 +182,7 @@ export function GoalsCard({
               <div className="h-2 overflow-hidden rounded-full bg-border">
                 <div
                   className={
-                    "h-full rounded-full transition-all " +
+                    "h-full rounded-full transition-all duration-500 " +
                     (g.achieved ? "bg-highlight" : "bg-accent")
                   }
                   style={{ width: `${g.progressPct ?? 0}%` }}
@@ -183,9 +192,9 @@ export function GoalsCard({
                 <span>Current: {g.currentText}</span>
                 <span>Target: {g.targetText}</span>
               </div>
-            </li>
+            </RevealListItem>
           ))}
-        </ul>
+        </RevealList>
       )}
 
       {adding && (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus } from "lucide-react";
+import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus, Sailboat } from "lucide-react";
 import { Button } from "@/components/ui";
 
 const links = [
@@ -25,12 +25,15 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-surface/85 backdrop-blur supports-[backdrop-filter]:bg-surface/70">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-display font-semibold tracking-tight">
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2 font-display font-semibold tracking-tight transition-transform duration-150 active:scale-[0.98]"
+        >
           <span
             aria-hidden
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-base text-accent-foreground"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-foreground"
           >
-            🚣
+            <Sailboat className="h-4 w-4" aria-hidden />
           </span>
           <span className="hidden sm:inline">Row Tracker</span>
         </Link>
@@ -43,7 +46,7 @@ export function Nav() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-colors duration-150 sm:px-3 ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-all duration-150 active:scale-[0.98] sm:px-3 ${
                   active
                     ? "bg-accent-soft font-medium text-accent-strong"
                     : "text-muted hover:bg-background hover:text-foreground"

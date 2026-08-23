@@ -135,3 +135,14 @@ body {
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
+
+/* Scroll-triggered reveals (src/components/motion/Reveal.tsx) depend on an
+ * IntersectionObserver actually firing, which never happens when printing
+ * — there's no scrolling. Without this, content below the fold would print
+ * as permanently-invisible blank space. */
+@media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -7,7 +7,6 @@ export default function LogPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
-        eyebrow="New entry"
         title="Log a workout"
         description="Enter a 2k/5k test piece, a training row, or anything else off the erg monitor."
         action={

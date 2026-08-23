@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { AlertCircle, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
+import { CountUp } from "@/components/motion/CountUp";
 
 export function Card({
   className,
@@ -16,7 +17,8 @@ export function Card({
     <div
       className={clsx(
         "rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]",
-        interactive && "transition-shadow hover:shadow-[var(--shadow-raised)]",
+        interactive &&
+          "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-raised)]",
         className,
       )}
     >
@@ -26,12 +28,10 @@ export function Card({
 }
 
 export function PageHeader({
-  eyebrow,
   title,
   description,
   action,
 }: {
-  eyebrow?: string;
   title: string;
   description?: ReactNode;
   action?: ReactNode;
@@ -39,12 +39,6 @@ export function PageHeader({
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
-        {eyebrow && (
-          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            {eyebrow}
-          </div>
-        )}
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
           {title}
         </h1>
@@ -55,8 +49,14 @@ export function PageHeader({
   );
 }
 
+// One press-scale value, reused by every clickable control in the app
+// (buttons, icon buttons, chips) — see Reveal.tsx's comment on the same
+// idea for scroll reveals: one consistent recipe, not a different feel
+// per component.
+const PRESS_SCALE = "active:scale-[0.97]";
+
 const buttonBase =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface";
+  `inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${PRESS_SCALE} disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface`;
 const buttonSizes = { sm: "px-2.5 py-1.5 text-xs", md: "px-4 py-2", lg: "px-5 py-2.5 text-base" };
 const buttonVariants = {
   primary: "bg-accent text-accent-foreground shadow-sm hover:bg-accent-strong",
@@ -134,7 +134,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={clsx(
-        "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        `inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-all duration-150 ${PRESS_SCALE} disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
         tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
         className,
       )}
@@ -191,7 +191,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
       {icon && (
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-2xl">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
           {icon}
         </div>
       )}
@@ -223,11 +223,20 @@ export function StatTile({
   icon,
   label,
   value,
+  numericValue,
+  format,
   tone = "default",
 }: {
   icon?: ReactNode;
   label: string;
+  /** Always the display fallback — used as-is when there's no numericValue
+   * (e.g. a "—" empty state), and as the pre-hydration/initial paint value
+   * otherwise. */
   value: string;
+  /** When set alongside `format`, the tile counts up to this number instead
+   * of just rendering `value` — see CountUp.tsx. */
+  numericValue?: number | null;
+  format?: (n: number) => string;
   tone?: "default" | "highlight";
 }) {
   return (
@@ -245,7 +254,9 @@ export function StatTile({
         )}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
+      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">
+        {numericValue != null && format ? <CountUp value={numericValue} format={format} /> : value}
+      </div>
     </Card>
   );
 }
@@ -310,7 +321,7 @@ export function Chip({
     <button
       type="button"
       className={clsx(
-        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        `cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all duration-150 ${PRESS_SCALE} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
         active
           ? "border-accent bg-accent-soft text-accent-strong"
           : "border-border text-muted hover:border-border-strong hover:bg-background",
@@ -327,12 +338,11 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={clsx("animate-pulse rounded-md bg-border/70", className)} aria-hidden />;
 }
 
-/** Skeleton for a PageHeader — title, eyebrow, and description bars. */
+/** Skeleton for a PageHeader — title and description bars. */
 export function PageHeaderSkeleton({ withAction }: { withAction?: boolean }) {
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div className="space-y-2">
-        <Skeleton className="h-3 w-20" />
         <Skeleton className="h-7 w-48" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>

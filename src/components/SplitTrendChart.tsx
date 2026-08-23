@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { formatSplit } from "@/lib/pace";
 import { EmptyState } from "@/components/ui";
@@ -70,7 +71,13 @@ export function SplitTrendChart({
   const prPoint = chartData.find((d) => d.isPR);
 
   if (chartData.length === 0) {
-    return <EmptyState icon="📈" title="No pieces logged yet" description={emptyDescription} />;
+    return (
+      <EmptyState
+        icon={<TrendingUp className="h-6 w-6" aria-hidden />}
+        title="No pieces logged yet"
+        description={emptyDescription}
+      />
+    );
   }
 
   return (
@@ -120,6 +127,8 @@ export function SplitTrendChart({
           strokeWidth={2.5}
           dot={{ r: 3 }}
           activeDot={{ r: 5 }}
+          animationDuration={600}
+          animationEasing="ease-out"
         />
         {prPoint && (
           <ReferenceDot

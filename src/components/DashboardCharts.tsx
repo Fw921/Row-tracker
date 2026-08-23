@@ -15,12 +15,13 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { formatDate, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
+import { formatCount, formatDate, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit } from "@/lib/pace";
 import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
 import { PACING_LABELS } from "@/lib/constants";
 import { GoalsCard } from "@/components/GoalsCard";
 import { SplitTrendChart } from "@/components/SplitTrendChart";
+import { Reveal, RevealList, RevealListItem, RevealRow, RevealTableBody } from "@/components/motion/Reveal";
 import type { GoalRecord } from "@/lib/goals";
 import Link from "next/link";
 import {
@@ -103,64 +104,76 @@ export function DashboardCharts({
           icon={<Timer className="h-3.5 w-3.5" aria-hidden />}
           label="Current 2K"
           value={current2k ? formatDuration(current2k.totalTimeSeconds) : "—"}
+          numericValue={current2k?.totalTimeSeconds}
+          format={formatDuration}
         />
         <StatTile
           icon={<Award className="h-3.5 w-3.5" aria-hidden />}
           tone="highlight"
           label="2K PR"
           value={pr2k ? formatDuration(pr2k.totalTimeSeconds) : "—"}
+          numericValue={pr2k?.totalTimeSeconds}
+          format={formatDuration}
         />
         <StatTile
           icon={<Award className="h-3.5 w-3.5" aria-hidden />}
           tone="highlight"
           label="5K PR"
           value={pr5k ? formatDuration(pr5k.totalTimeSeconds) : "—"}
+          numericValue={pr5k?.totalTimeSeconds}
+          format={formatDuration}
         />
         <StatTile
           icon={<Route className="h-3.5 w-3.5" aria-hidden />}
           label="Total meters"
           value={formatMeters(totalMeters)}
+          numericValue={totalMeters}
+          format={formatMeters}
         />
         <StatTile
           icon={<CalendarRange className="h-3.5 w-3.5" aria-hidden />}
           label="Workouts this month"
           value={String(monthCount)}
+          numericValue={monthCount}
+          format={formatCount}
         />
       </div>
 
       {/* 2. 2K progress chart — the largest thing on the page */}
-      <Card className="p-4 sm:p-6" interactive>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display text-base font-semibold text-foreground">
-              {bucket ? `${bucketLabel(bucket)} progress` : "Progress"}
-            </h2>
-            <p className="text-xs text-muted">Every result, oldest to newest · lower is faster</p>
-          </div>
-          {buckets.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {buckets.map((b) => (
-                <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
-                  {bucketLabel(b)}
-                </Chip>
-              ))}
+      <Reveal>
+        <Card className="p-4 sm:p-6" interactive>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display text-base font-semibold text-foreground">
+                {bucket ? `${bucketLabel(bucket)} progress` : "Progress"}
+              </h2>
+              <p className="text-xs text-muted">Every result, oldest to newest · lower is faster</p>
             </div>
-          )}
-        </div>
+            {buckets.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {buckets.map((b) => (
+                  <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
+                    {bucketLabel(b)}
+                  </Chip>
+                ))}
+              </div>
+            )}
+          </div>
 
-        <SplitTrendChart workouts={workouts} bucket={bucket} />
-      </Card>
+          <SplitTrendChart workouts={workouts} bucket={bucket} />
+        </Card>
+      </Reveal>
 
       {/* 3. Recent workouts */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Recent workouts</h2>
         {recent.length === 0 ? (
-          <EmptyState icon="🚣" title="Nothing logged yet" />
+          <EmptyState icon={<Activity className="h-6 w-6" aria-hidden />} title="Nothing logged yet" />
         ) : (
           <Card className="overflow-hidden">
-            <ul className="divide-y divide-border">
+            <RevealList className="divide-y divide-border">
               {recent.map((w) => (
-                <li key={w.id}>
+                <RevealListItem key={w.id}>
                   <Link
                     href={`/workouts/${w.id}`}
                     className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-background"
@@ -173,41 +186,51 @@ export function DashboardCharts({
                       {formatRelativeDate(w.date)}
                     </span>
                   </Link>
-                </li>
+                </RevealListItem>
               ))}
-            </ul>
+            </RevealList>
           </Card>
         )}
-      </div>
+      </Reveal>
 
       {/* 4. Training volume */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Training volume</h2>
         <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
           <StatTile
             icon={<Route className="h-3.5 w-3.5" aria-hidden />}
             label="This week"
             value={formatMeters(volume.weekMeters)}
+            numericValue={volume.weekMeters}
+            format={formatMeters}
           />
           <StatTile
             icon={<Route className="h-3.5 w-3.5" aria-hidden />}
             label="This month"
             value={formatMeters(volume.monthMeters)}
+            numericValue={volume.monthMeters}
+            format={formatMeters}
           />
           <StatTile
             icon={<Route className="h-3.5 w-3.5" aria-hidden />}
             label="This season"
             value={formatMeters(volume.seasonMeters)}
+            numericValue={volume.seasonMeters}
+            format={formatMeters}
           />
           <StatTile
             icon={<Activity className="h-3.5 w-3.5" aria-hidden />}
             label="Workouts"
             value={String(volume.workoutCount)}
+            numericValue={volume.workoutCount}
+            format={formatCount}
           />
           <StatTile
             icon={<Gauge className="h-3.5 w-3.5" aria-hidden />}
             label="Avg distance"
             value={volume.workoutCount ? formatMeters(volume.avgWorkoutMeters) : "—"}
+            numericValue={volume.workoutCount ? volume.avgWorkoutMeters : undefined}
+            format={formatMeters}
           />
         </div>
         <Card className="p-4 sm:p-5" interactive>
@@ -218,14 +241,20 @@ export function DashboardCharts({
               <XAxis dataKey="day" tick={axisTick} />
               <YAxis tick={axisTick} width={48} tickFormatter={(v) => formatMeters(v)} />
               <Tooltip formatter={(v) => [formatMeters(Number(v)), "Distance"]} contentStyle={tooltipStyle} />
-              <Bar dataKey="meters" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="meters"
+                fill="var(--accent)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={600}
+                animationEasing="ease-out"
+              />
             </BarChart>
           </ResponsiveContainer>
         </Card>
-      </div>
+      </Reveal>
 
       {/* 5. Pacing analysis */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Pacing analysis</h2>
         {pacedPiece && pacing ? (
           <Card className="overflow-hidden">
@@ -244,9 +273,9 @@ export function DashboardCharts({
                     <th className="px-4 py-2 text-right">Split /500m</th>
                   </tr>
                 </thead>
-                <tbody>
+                <RevealTableBody>
                   {pacing.ranges.map((r) => (
-                    <tr key={r.index} className="border-b border-border last:border-0">
+                    <RevealRow key={r.index} className="border-b border-border last:border-0">
                       <td className="px-4 py-1.5 text-muted">
                         {formatMeters(r.startMeters)}–{formatMeters(r.endMeters)}
                       </td>
@@ -263,9 +292,9 @@ export function DashboardCharts({
                           </Badge>
                         )}
                       </td>
-                    </tr>
+                    </RevealRow>
                   ))}
-                </tbody>
+                </RevealTableBody>
               </table>
             </div>
             <div className="grid grid-cols-2 gap-3 px-4 py-3 text-xs text-muted sm:grid-cols-3">
@@ -289,24 +318,28 @@ export function DashboardCharts({
         ) : (
           <EmptyState title="No multi-split pieces yet" description="Log a piece with splits to see a pacing breakdown here." />
         )}
-      </div>
+      </Reveal>
 
       {/* 6. Goals */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Goals</h2>
         <GoalsCard goals={goals} workouts={workouts} />
-      </div>
+      </Reveal>
 
       {/* 7. Personal records */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Personal records</h2>
         {records.length === 0 && !thirtyMin ? (
-          <EmptyState icon="🏆" title="No PRs yet" description="Log a test piece at a standard distance to start tracking PRs." />
+          <EmptyState
+            icon={<Medal className="h-6 w-6" aria-hidden />}
+            title="No PRs yet"
+            description="Log a test piece at a standard distance to start tracking PRs."
+          />
         ) : (
           <Card>
-            <ul className="divide-y divide-border">
+            <RevealList className="divide-y divide-border">
               {records.map((r) => (
-                <li key={r.bucket} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                <RevealListItem key={r.bucket} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
                   <span className="flex items-center gap-2 font-medium text-foreground">
                     <Medal className="h-4 w-4 text-highlight" aria-hidden />
                     {bucketLabel(r.bucket)}
@@ -317,47 +350,47 @@ export function DashboardCharts({
                       · {formatSplit(r.workout.avgSplitSeconds500m)}/500m
                     </span>
                   </span>
-                </li>
+                </RevealListItem>
               ))}
               {thirtyMin && (
-                <li className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                <RevealListItem className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
                   <span className="flex items-center gap-2 font-medium text-foreground">
                     <Medal className="h-4 w-4 text-highlight" aria-hidden />
                     30 min
                   </span>
                   <span className="tabular">{formatMeters(thirtyMin.totalDistanceMeters)}</span>
-                </li>
+                </RevealListItem>
               )}
-            </ul>
+            </RevealList>
           </Card>
         )}
-      </div>
+      </Reveal>
 
       {/* 8. Training insights */}
-      <div>
+      <Reveal>
         <h2 className="mb-2 flex items-center gap-1.5 font-display text-sm font-semibold text-foreground">
           <Sparkles className="h-4 w-4 text-accent" aria-hidden />
           Training insights
         </h2>
         {insights.length === 0 ? (
           <EmptyState
-            icon="🧠"
+            icon={<Sparkles className="h-6 w-6" aria-hidden />}
             title="Not enough data yet"
             description="Log a few more pieces and Row Tracker will start surfacing trends here."
           />
         ) : (
           <Card>
-            <ul className="divide-y divide-border">
+            <RevealList className="divide-y divide-border">
               {insights.map((insight) => (
-                <li key={insight.id} className="flex items-start gap-2.5 px-4 py-3 text-sm text-foreground">
+                <RevealListItem key={insight.id} className="flex items-start gap-2.5 px-4 py-3 text-sm text-foreground">
                   <InsightIcon id={insight.id} />
                   <span>{insight.text}</span>
-                </li>
+                </RevealListItem>
               ))}
-            </ul>
+            </RevealList>
           </Card>
         )}
-      </div>
+      </Reveal>
     </div>
   );
 }

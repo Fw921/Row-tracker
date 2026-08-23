@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, Avatar, Button, Card, EmptyState, IconButton, inputClass } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { RevealList, RevealListItem } from "@/components/motion/Reveal";
 
 type Athlete = { id: string; name: string };
 
@@ -79,15 +80,15 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
 
       {athletes.length === 0 ? (
         <EmptyState
-          icon="🚣"
+          icon={<Users className="h-6 w-6" aria-hidden />}
           title="No teammates yet"
           description="Add everyone in the boat here, then you can log a piece for the whole crew at once."
         />
       ) : (
         <Card>
-          <ul className="divide-y divide-border">
+          <RevealList className="divide-y divide-border">
             {athletes.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <RevealListItem key={a.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="flex items-center gap-3">
                   <Avatar name={a.name} />
                   <span className="text-sm font-medium">{a.name}</span>
@@ -100,9 +101,9 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden />
                 </IconButton>
-              </li>
+              </RevealListItem>
             ))}
-          </ul>
+          </RevealList>
         </Card>
       )}
 

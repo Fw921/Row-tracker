@@ -1,6 +1,7 @@
 "use client";
 
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { Sailboat } from "lucide-react";
 
 // Illustrative only — a glimpse of what the real dashboard looks like once
 // there's training data behind it. Explicitly labeled "sample data" below
@@ -30,10 +31,10 @@ export function AuthShowcase() {
       <div className="relative z-10 flex items-center gap-2.5">
         <span
           aria-hidden
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-base"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
           style={{ backgroundColor: "var(--chart-5)" }}
         >
-          🚣
+          <Sailboat className="h-4 w-4" aria-hidden />
         </span>
         <span className="font-display text-lg font-semibold tracking-tight">Row Tracker</span>
       </div>
@@ -72,7 +73,8 @@ export function AuthShowcase() {
                   stroke="var(--chart-5)"
                   strokeWidth={2}
                   fill="url(#authTrendFill)"
-                  isAnimationActive={false}
+                  animationDuration={600}
+                  animationEasing="ease-out"
                 />
               </AreaChart>
             </ResponsiveContainer>

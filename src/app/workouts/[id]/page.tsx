@@ -13,12 +13,13 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
-import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
+import { formatCount, formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit, classifyPacing } from "@/lib/pace";
 import { PACING_LABELS } from "@/lib/constants";
 import { SplitChart } from "@/components/SplitChart";
 import { DeleteWorkoutButton } from "@/components/DeleteWorkoutButton";
 import { Avatar, Badge, Card, PageHeader, StatTile } from "@/components/ui";
+import { Reveal, RevealList, RevealListItem, RevealRow, RevealTableBody } from "@/components/motion/Reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -61,9 +62,8 @@ export default async function WorkoutDetailPage({
       </Link>
 
       <PageHeader
-        eyebrow={WORKOUT_TYPE_SHORT[workout.type]}
         title={workout.title || WORKOUT_TYPE_SHORT[workout.type]}
-        description={`${formatDate(workout.date)} · ${
+        description={`${workout.title ? `${WORKOUT_TYPE_SHORT[workout.type]} · ` : ""}${formatDate(workout.date)} · ${
           workout.source === "CONCEPT2_CSV" ? "Imported from Concept2" : "Manual entry"
         }`}
         action={<DeleteWorkoutButton id={workout.id} />}
@@ -75,33 +75,61 @@ export default async function WorkoutDetailPage({
       </div>
 
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        <StatTile icon={<Route className="h-3.5 w-3.5" aria-hidden />} label="Distance" value={formatMeters(workout.totalDistanceMeters)} />
-        <StatTile icon={<Timer className="h-3.5 w-3.5" aria-hidden />} label="Time" value={formatDuration(workout.totalTimeSeconds)} />
-        <StatTile icon={<Gauge className="h-3.5 w-3.5" aria-hidden />} label="Split /500m" value={formatSplit(workout.avgSplitSeconds500m)} />
+        <StatTile
+          icon={<Route className="h-3.5 w-3.5" aria-hidden />}
+          label="Distance"
+          value={formatMeters(workout.totalDistanceMeters)}
+          numericValue={workout.totalDistanceMeters}
+          format={formatMeters}
+        />
+        <StatTile
+          icon={<Timer className="h-3.5 w-3.5" aria-hidden />}
+          label="Time"
+          value={formatDuration(workout.totalTimeSeconds)}
+          numericValue={workout.totalTimeSeconds}
+          format={formatDuration}
+        />
+        <StatTile
+          icon={<Gauge className="h-3.5 w-3.5" aria-hidden />}
+          label="Split /500m"
+          value={formatSplit(workout.avgSplitSeconds500m)}
+          numericValue={workout.avgSplitSeconds500m}
+          format={formatSplit}
+        />
         <StatTile
           icon={<HeartPulse className="h-3.5 w-3.5" aria-hidden />}
           label="Avg HR"
           value={workout.avgHeartRate ? `${workout.avgHeartRate} bpm` : "—"}
+          numericValue={workout.avgHeartRate}
+          format={(n) => `${formatCount(n)} bpm`}
         />
         <StatTile
           icon={<Heart className="h-3.5 w-3.5" aria-hidden />}
           label="Max HR"
           value={workout.maxHeartRate ? `${workout.maxHeartRate} bpm` : "—"}
+          numericValue={workout.maxHeartRate}
+          format={(n) => `${formatCount(n)} bpm`}
         />
         <StatTile
           icon={<Zap className="h-3.5 w-3.5" aria-hidden />}
           label="Avg watts"
           value={workout.avgWatts ? `${Math.round(workout.avgWatts)}W` : "—"}
+          numericValue={workout.avgWatts}
+          format={(n) => `${formatCount(n)}W`}
         />
         <StatTile
           icon={<Activity className="h-3.5 w-3.5" aria-hidden />}
           label="Stroke rate"
           value={workout.avgStrokeRate ? `${workout.avgStrokeRate}/min` : "—"}
+          numericValue={workout.avgStrokeRate}
+          format={(n) => `${formatCount(n)}/min`}
         />
         <StatTile
           icon={<Wind className="h-3.5 w-3.5" aria-hidden />}
           label="Drag factor"
           value={workout.dragFactor ? String(workout.dragFactor) : "—"}
+          numericValue={workout.dragFactor}
+          format={formatCount}
         />
       </div>
 
@@ -112,7 +140,7 @@ export default async function WorkoutDetailPage({
       )}
 
       {workout.splits.length > 0 && (
-        <div className="mb-8">
+        <Reveal className="mb-8">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-display text-sm font-semibold text-foreground">Pacing</h2>
             <Badge tone={PACING_TONE[pacing]}>{PACING_LABELS[pacing]}</Badge>
@@ -133,9 +161,9 @@ export default async function WorkoutDetailPage({
                     <th className="px-3 py-2 text-right">Avg HR</th>
                   </tr>
                 </thead>
-                <tbody>
+                <RevealTableBody>
                   {workout.splits.map((s) => (
-                    <tr key={s.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
+                    <RevealRow key={s.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
                       <td className="px-3 py-2 text-muted">{s.index}</td>
                       <td className="px-3 py-2 text-right tabular">
                         {formatMeters(s.distanceMeters)}
@@ -147,26 +175,26 @@ export default async function WorkoutDetailPage({
                         {formatSplit(s.splitSeconds500m)}
                       </td>
                       <td className="px-3 py-2 text-right tabular text-muted">{s.avgHeartRate ?? "—"}</td>
-                    </tr>
+                    </RevealRow>
                   ))}
-                </tbody>
+                </RevealTableBody>
               </table>
             </div>
 
             {/* Stacked rows — below sm. */}
-            <ul className="divide-y divide-border sm:hidden">
+            <RevealList className="divide-y divide-border sm:hidden">
               {workout.splits.map((s) => (
-                <li key={s.id} className="flex items-center gap-3 px-3 py-2.5 text-sm">
+                <RevealListItem key={s.id} className="flex items-center gap-3 px-3 py-2.5 text-sm">
                   <span className="w-5 shrink-0 text-xs text-muted">{s.index}</span>
                   <span className="tabular flex-1">{formatMeters(s.distanceMeters)}</span>
                   <span className="tabular flex-1">{formatDuration(s.timeSeconds)}</span>
                   <span className="tabular flex-1 font-medium">{formatSplit(s.splitSeconds500m)}</span>
                   <span className="tabular w-12 shrink-0 text-right text-muted">{s.avgHeartRate ?? "—"}</span>
-                </li>
+                </RevealListItem>
               ))}
-            </ul>
+            </RevealList>
           </Card>
-        </div>
+        </Reveal>
       )}
     </div>
   );

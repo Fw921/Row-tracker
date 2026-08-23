@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Activity, Award, CalendarRange, Route } from "lucide-react";
-import { formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
+import { formatCount, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration } from "@/lib/pace";
 import { Avatar, Button, Card, EmptyState, Skeleton, StatTile } from "@/components/ui";
 import { Sheet, SheetBody, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -101,7 +101,11 @@ export function AthleteSheet({
           )}
 
           {!loading && workouts && workouts.length === 0 && (
-            <EmptyState icon="🚣" title="No pieces logged yet" description="Nothing logged for this athlete yet." />
+            <EmptyState
+              icon={<Activity className="h-6 w-6" aria-hidden />}
+              title="No pieces logged yet"
+              description="Nothing logged for this athlete yet."
+            />
           )}
 
           {!loading && workouts && workouts.length > 0 && (
@@ -112,16 +116,22 @@ export function AthleteSheet({
                   tone="highlight"
                   label={primaryBucket ? `${bucketLabel(primaryBucket)} PR` : "PR"}
                   value={pr ? formatDuration(pr.totalTimeSeconds) : "—"}
+                  numericValue={pr?.totalTimeSeconds}
+                  format={formatDuration}
                 />
                 <StatTile
                   icon={<Route className="h-3.5 w-3.5" aria-hidden />}
                   label="Total meters"
                   value={formatMeters(totalMeters)}
+                  numericValue={totalMeters}
+                  format={formatMeters}
                 />
                 <StatTile
                   icon={<Activity className="h-3.5 w-3.5" aria-hidden />}
                   label="Workouts logged"
                   value={String(workouts.length)}
+                  numericValue={workouts.length}
+                  format={formatCount}
                 />
                 <StatTile
                   icon={<CalendarRange className="h-3.5 w-3.5" aria-hidden />}

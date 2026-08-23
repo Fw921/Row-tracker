@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Plus, Trophy } from "lucide-react";
+import { Activity, ChevronRight, LineChart, Plus, Trophy } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { DashboardCharts } from "@/components/DashboardCharts";
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       <div className="max-w-lg">
         <PageHeader title="Welcome to Row Tracker" />
         <EmptyState
-          icon="🚣"
+          icon={<Activity className="h-6 w-6" aria-hidden />}
           title="Nothing logged yet"
           description="Log your first 2k, 5k, or training row — or the whole boat's piece at once — to start seeing charts here."
           action={
@@ -92,7 +92,6 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Overview"
         title="Dashboard"
         action={
           <Button href="/log/team">
@@ -146,7 +145,7 @@ export default async function DashboardPage() {
         <DashboardCharts workouts={data} goals={goalRecords} />
       ) : (
         <EmptyState
-          icon="📊"
+          icon={<LineChart className="h-6 w-6" aria-hidden />}
           title="No personal pieces yet"
           description="These charts track your own results — log one to see your trend."
           action={<Button href="/log">Log a workout</Button>}

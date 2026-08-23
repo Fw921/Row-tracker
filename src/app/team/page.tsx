@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Flag, Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
@@ -7,6 +7,7 @@ import { formatDuration } from "@/lib/pace";
 import { summarizeAthlete, type AthleteWorkout, type TeamPieceEvent } from "@/lib/team";
 import { Badge, Button, Card, EmptyState, PageHeader } from "@/components/ui";
 import { TeamOverviewCharts } from "@/components/TeamOverviewCharts";
+import { Reveal } from "@/components/motion/Reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,9 @@ export default async function TeamIndexPage() {
   if (athletes.length === 0 && pieceGroups.length === 0) {
     return (
       <div className="max-w-lg">
-        <PageHeader eyebrow="Coach" title="Team" />
+        <PageHeader title="Team" />
         <EmptyState
-          icon="🏁"
+          icon={<Flag className="h-6 w-6" aria-hidden />}
           title="No team data yet"
           description="Add your roster and log a team piece — like calling out splits in the erg room — and this page turns into a coach dashboard."
           action={
@@ -74,7 +75,6 @@ export default async function TeamIndexPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Coach"
         title="Team"
         description="Everyone on the roster, and every piece you've logged for the whole boat at once."
         action={
@@ -96,7 +96,7 @@ export default async function TeamIndexPage() {
       <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Recent team pieces</h2>
       {pieceGroups.length === 0 ? (
         <EmptyState
-          icon="🏁"
+          icon={<Flag className="h-6 w-6" aria-hidden />}
           title="No team pieces yet"
           description="Log the same piece for everyone at once and it'll show up here as a leaderboard."
           action={
@@ -107,33 +107,37 @@ export default async function TeamIndexPage() {
           }
         />
       ) : (
-        <Card>
-          <ul className="divide-y divide-border">
-            {pieceGroups.map((pg) => (
-              <li key={pg.id}>
-                <Link
-                  href={`/team/${pg.id}`}
-                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-background"
-                >
-                  <div>
-                    <div className="font-medium">
-                      {pg.title || WORKOUT_TYPE_SHORT[pg.type]}
+        // Single reveal, not per-row stagger — a season of team pieces is an
+        // unbounded list (see the same note on /history).
+        <Reveal>
+          <Card>
+            <ul className="divide-y divide-border">
+              {pieceGroups.map((pg) => (
+                <li key={pg.id}>
+                  <Link
+                    href={`/team/${pg.id}`}
+                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-background"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        {pg.title || WORKOUT_TYPE_SHORT[pg.type]}
+                      </div>
+                      <div className="text-xs text-muted">
+                        {formatDate(pg.date)} ·{" "}
+                        {pg.targetDistanceMeters
+                          ? formatMeters(pg.targetDistanceMeters)
+                          : formatDuration(pg.targetTimeSeconds ?? 0)}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted">
-                      {formatDate(pg.date)} ·{" "}
-                      {pg.targetDistanceMeters
-                        ? formatMeters(pg.targetDistanceMeters)
-                        : formatDuration(pg.targetTimeSeconds ?? 0)}
-                    </div>
-                  </div>
-                  <Badge tone="accent">
-                    {pg.workouts.length} rower{pg.workouts.length === 1 ? "" : "s"}
-                  </Badge>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
+                    <Badge tone="accent">
+                      {pg.workouts.length} rower{pg.workouts.length === 1 ? "" : "s"}
+                    </Badge>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </Reveal>
       )}
     </div>
   );
