@@ -5,49 +5,53 @@
 @import "tw-animate-css";
 
 :root {
-  /* Cool paper background with a hint of green — reads as "boathouse", not
-   * generic SaaS blue-white. */
-  --background: #f3f6f4;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --border: #e1e7e3;
-  --border-strong: #cdd7d1;
-  --foreground: #0e1a17;
-  --muted: #5b6b65;
-  --muted-soft: #8b978f;
+  /* Dark-first palette: this reads as an energetic training app, not a
+   * boathouse ledger. Near-black with a faint violet undertone (not flat
+   * gray) so accent colors have somewhere to glow. Dark is the default —
+   * see the light override below for prefers-color-scheme: light. */
+  --background: #0a0a0f;
+  --surface: #131319;
+  --surface-raised: #1a1a23;
+  --border: #26262f;
+  --border-strong: #34343f;
+  --foreground: #f7f7fb;
+  --muted: #a6a6b8;
+  --muted-soft: #6f6f82;
 
-  /* Deep racing-shell teal — richer and slightly more saturated than a flat
-   * "brand blue" so buttons/links read as a considered color, not a default. */
-  --accent: #0a6a5a;
-  --accent-strong: #054e42;
-  --accent-foreground: #ffffff;
-  --accent-soft: #e1f2ec;
+  /* Fiery orange-red — the brand/CTA color. Motivating, high-energy, and
+   * distinct from the highlight/negative/positive hues below so it never
+   * gets mistaken for a status color. */
+  --accent: #ff5029;
+  --accent-strong: #ff8a63;
+  --accent-foreground: #1a0400;
+  --accent-soft: #2a120c;
 
-  /* Brass/regatta-clock gold, for standout moments (PRs, 1st place). */
-  --highlight: #ad7f1f;
-  --highlight-strong: #7d5c14;
-  --highlight-foreground: #ffffff;
-  --highlight-soft: #f9f0dc;
+  /* Electric lime — reserved for standout moments (PRs, 1st place), same
+   * role the old brass/gold played but turned up to fitness-app voltage. */
+  --highlight: #c9ff3d;
+  --highlight-strong: #e0ff85;
+  --highlight-foreground: #1b2200;
+  --highlight-soft: #232b06;
 
   /* negative/positive read as "slower/faster", not good/bad, since a positive
    * split (fading) is the erg-room-bad one and a negative split is good. */
-  --negative: #157a4f;
-  --positive: #bf4a1e;
-  /* Text-on-tint variant (e.g. Alert body, "slower" badge text) — #bf4a1e at
-   * 10% over surface only measures 4.34:1, short of the 4.5:1 AA floor for
-   * body text. This darkened value clears 5.4:1+ on that tint. */
-  --positive-strong: #a5401a;
+  --negative: #2fe38a;
+  --positive: #ff4d8d;
+  --positive-strong: #ff85ae;
 
   /* Supporting hues for multi-series charts, chosen to sit alongside accent
    * and highlight without fighting them. */
   --chart-1: var(--accent);
   --chart-2: var(--highlight);
-  --chart-3: #5b57b8;
-  --chart-4: #b5451b;
-  --chart-5: #3d7ea6;
+  --chart-3: #7c8cff;
+  --chart-4: #3ec7ff;
+  --chart-5: var(--positive);
 
-  --shadow-card: 0 1px 2px rgba(14, 26, 23, 0.05), 0 1px 1px rgba(14, 26, 23, 0.03);
-  --shadow-raised: 0 8px 24px -8px rgba(14, 26, 23, 0.16), 0 2px 6px -2px rgba(14, 26, 23, 0.08);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  /* Colored glow for hero/CTA moments — the "energetic" accent shadows a
+   * flat dark UI can't get from rgba(black) alone. */
+  --shadow-accent-glow: 0 0 0 1px rgba(255, 80, 41, 0.4), 0 8px 32px -8px rgba(255, 80, 41, 0.45);
 }
 
 @theme inline {
@@ -79,41 +83,43 @@
   --font-display: var(--font-space-grotesk);
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light override for users whose system prefers light — still the same
+ * bold orange/lime/pink brand, just re-tuned (darker accents, white
+ * surfaces) so everything clears AA on a light ground instead of dark. */
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a100e;
-    --surface: #101815;
-    --surface-raised: #141e1a;
-    --border: #223029;
-    --border-strong: #2d3f36;
-    --foreground: #eef3f0;
-    --muted: #8fa199;
-    --muted-soft: #647169;
+    --background: #fdf5f0;
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    --border: #f0ddd2;
+    --border-strong: #e0c2ae;
+    --foreground: #1a0f0a;
+    --muted: #6b5850;
+    --muted-soft: #9c887e;
 
-    --accent: #33bda6;
-    --accent-strong: #5fd0bc;
-    --accent-foreground: #04211f;
-    --accent-soft: #123330;
+    --accent: #cc3600;
+    --accent-strong: #a62c00;
+    --accent-foreground: #ffffff;
+    --accent-soft: #ffe4d8;
 
-    --highlight: #d9a942;
-    --highlight-strong: #eabf63;
-    --highlight-foreground: #241a02;
-    --highlight-soft: #2a2210;
+    --highlight: #8f6200;
+    --highlight-strong: #6e4c00;
+    --highlight-foreground: #ffffff;
+    --highlight-soft: #fbeed1;
 
-    --negative: #4fd48a;
-    --positive: #ff9466;
-    /* Dark surfaces already give #ff9466 7:1+ on its own tint — no darkening
-     * needed here, unlike the light-mode value above. */
-    --positive-strong: #ff9466;
+    --negative: #06793d;
+    --positive: #c81870;
+    --positive-strong: #a01259;
 
     --chart-1: var(--accent);
     --chart-2: var(--highlight);
-    --chart-3: #948dee;
-    --chart-4: #ff8f66;
-    --chart-5: #6fb6e0;
+    --chart-3: #4b4fd6;
+    --chart-4: #0c7fa8;
+    --chart-5: var(--positive);
 
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
-    --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+    --shadow-card: 0 1px 2px rgba(26, 15, 10, 0.05), 0 1px 1px rgba(26, 15, 10, 0.03);
+    --shadow-raised: 0 8px 24px -8px rgba(26, 15, 10, 0.16), 0 2px 6px -2px rgba(26, 15, 10, 0.08);
+    --shadow-accent-glow: 0 0 0 1px rgba(204, 54, 0, 0.3), 0 8px 32px -8px rgba(204, 54, 0, 0.35);
   }
 }
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus } from "lucide-react";
+import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui";
 
 const links = [
@@ -22,7 +22,7 @@ export function Nav() {
         <Link href="/" className="flex shrink-0 items-center gap-2 font-display font-semibold tracking-tight">
           <span
             aria-hidden
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-base text-accent-foreground"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-positive text-base text-accent-foreground shadow-[var(--shadow-accent-glow)]"
           >
             🚣
           </span>
@@ -49,6 +49,13 @@ export function Nav() {
             );
           })}
         </nav>
+        <Link
+          href="/welcome"
+          className="hidden shrink-0 items-center gap-1 text-xs font-medium text-muted transition-colors hover:text-highlight md:inline-flex"
+        >
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          Tour
+        </Link>
         <Button href="/log" size="sm" className="shrink-0">
           <Plus className="h-3.5 w-3.5" aria-hidden />
           Log
