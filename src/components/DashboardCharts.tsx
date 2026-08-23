@@ -287,7 +287,7 @@ export function DashboardCharts({
             </div>
           </Card>
         ) : (
-          <EmptyState icon="⚡" title="No multi-split pieces yet" description="Log a piece with splits to see a pacing breakdown here." />
+          <EmptyState title="No multi-split pieces yet" description="Log a piece with splits to see a pacing breakdown here." />
         )}
       </div>
 

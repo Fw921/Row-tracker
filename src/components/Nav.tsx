@@ -13,8 +13,14 @@ const links = [
   { href: "/import", label: "Import", icon: Upload },
 ];
 
+// Entry-point auth screens (see src/app/login, /signup, /forgot-password)
+// are full-bleed and pre-login — showing the logged-in app's nav on top of
+// them would both look wrong and imply a session that doesn't exist yet.
+const NAV_HIDDEN_ROUTES = ["/login", "/signup", "/forgot-password"];
+
 export function Nav() {
   const pathname = usePathname();
+  if (NAV_HIDDEN_ROUTES.includes(pathname)) return null;
 
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-surface/85 backdrop-blur supports-[backdrop-filter]:bg-surface/70">
