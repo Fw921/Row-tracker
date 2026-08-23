@@ -25,6 +25,7 @@ model User {
   importBatches ImportBatch[]
   athletes      Athlete[]
   pieceGroups   PieceGroup[]
+  goals         Goal[]
 
   @@map("users")
 }
@@ -69,6 +70,36 @@ model PieceGroup {
 
   @@index([userId, date])
   @@map("piece_groups")
+}
+
+/// What a Goal's target/progress numbers mean — drives which fields on it
+/// are set and how the dashboard computes "current" against them.
+enum GoalType {
+  SPLIT_TARGET // beat a split at a given distance bucket, e.g. sub-7:00 2k
+  TOTAL_METERS // cumulative distance across all logged workouts
+  MONTHLY_WORKOUTS // workouts logged in the current calendar month
+}
+
+/// A rower-set target shown on the Goals card. Only the target is stored —
+/// "current" and percent-complete are always derived from Workout data at
+/// render time, so a goal can never drift out of sync with the log.
+model Goal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type  GoalType
+  label String? // optional custom display label, e.g. "Sub-7:00 2K"
+
+  targetDistanceMeters   Float? // SPLIT_TARGET: which bucket (500, 2000, ...)
+  targetSplitSeconds500m Float? // SPLIT_TARGET: split to beat
+  targetMeters           Float? // TOTAL_METERS
+  targetWorkoutsPerMonth Int? // MONTHLY_WORKOUTS
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("goals")
 }
 
 /// How a workout's data got into the system.

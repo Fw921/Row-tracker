@@ -7,6 +7,7 @@ import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration } from "@/lib/pace";
 import { Badge, Button, Card, EmptyState, PageHeader } from "@/components/ui";
 import type { DashboardWorkout } from "@/lib/dashboard";
+import type { GoalRecord } from "@/lib/goals";
 
 // Always reflects the latest logged/imported workouts — never prerender.
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
-  const [workouts, recentPieceGroups] = await Promise.all([
+  const [workouts, recentPieceGroups, goals] = await Promise.all([
     // Only the account owner's own pieces — a teammate's team-piece result
     // shouldn't blend into "my" trend/PR/volume charts. Team results get
     // their own leaderboard view instead (see the block below and /team).
@@ -28,6 +29,10 @@ export default async function DashboardPage() {
       orderBy: { date: "desc" },
       take: 3,
       include: { _count: { select: { workouts: true } } },
+    }),
+    prisma.goal.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
@@ -64,7 +69,24 @@ export default async function DashboardPage() {
     totalTimeSeconds: w.totalTimeSeconds,
     avgSplitSeconds500m: w.avgSplitSeconds500m,
     avgHeartRate: w.avgHeartRate,
-    splits: w.splits.map((s) => ({ index: s.index, splitSeconds500m: s.splitSeconds500m })),
+    splits: w.splits.map((s) => ({
+      index: s.index,
+      distanceMeters: s.distanceMeters,
+      timeSeconds: s.timeSeconds,
+      splitSeconds500m: s.splitSeconds500m,
+      avgStrokeRate: s.avgStrokeRate,
+    })),
+  }));
+
+  const goalRecords: GoalRecord[] = goals.map((g) => ({
+    id: g.id,
+    type: g.type,
+    label: g.label,
+    targetDistanceMeters: g.targetDistanceMeters,
+    targetSplitSeconds500m: g.targetSplitSeconds500m,
+    targetMeters: g.targetMeters,
+    targetWorkoutsPerMonth: g.targetWorkoutsPerMonth,
+    createdAt: g.createdAt.toISOString(),
   }));
 
   return (
@@ -121,7 +143,7 @@ export default async function DashboardPage() {
       )}
 
       {workouts.length > 0 ? (
-        <DashboardCharts workouts={data} />
+        <DashboardCharts workouts={data} goals={goalRecords} />
       ) : (
         <EmptyState
           icon="📊"

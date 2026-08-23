@@ -5,26 +5,51 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
-  Legend,
+  ReferenceDot,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { Activity, Award, CalendarRange, Route } from "lucide-react";
-import { formatDate, formatMeters } from "@/lib/format";
-import { formatSplit } from "@/lib/pace";
-import { Card, Chip, StatTile } from "@/components/ui";
 import {
+  Activity,
+  Award,
+  BarChart3,
+  CalendarRange,
+  Gauge,
+  Medal,
+  Route,
+  Sparkles,
+  Timer,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import { formatDate, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
+import { formatDuration, formatSplit } from "@/lib/pace";
+import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
+import { PACING_LABELS } from "@/lib/constants";
+import { GoalsCard } from "@/components/GoalsCard";
+import type { GoalRecord } from "@/lib/goals";
+import Link from "next/link";
+import {
+  bestFixedTimeEffort,
   bestSplitForBucket,
+  bucketLabel,
+  buildInsights,
+  dailyVolumeThisWeek,
   distinctBuckets,
-  weeklyVolume,
+  latestPacedPiece,
+  linearRegression,
+  mostRecentInBucket,
+  pacingSummary,
+  personalRecords,
+  volumeSummary,
+  workoutsInBucket,
+  workoutsThisMonth,
   type DashboardWorkout,
 } from "@/lib/dashboard";
-
-const LINE_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
 
 const tooltipStyle = {
   background: "var(--surface)",
@@ -35,178 +60,419 @@ const tooltipStyle = {
 };
 const axisTick = { fontSize: 12, fill: "var(--muted)" };
 
-export function DashboardCharts({ workouts }: { workouts: DashboardWorkout[] }) {
+const PACING_TONE: Record<string, "faster" | "slower" | "neutral"> = {
+  negative: "faster",
+  positive: "slower",
+  even: "neutral",
+  unknown: "neutral",
+};
+
+export function DashboardCharts({
+  workouts,
+  goals,
+}: {
+  workouts: DashboardWorkout[];
+  goals: GoalRecord[];
+}) {
   const buckets = useMemo(() => distinctBuckets(workouts), [workouts]);
   const [bucket, setBucket] = useState<number | null>(buckets[0] ?? null);
 
-  const inBucket = useMemo(
-    () =>
-      bucket === null
-        ? []
-        : workouts
-            .filter((w) => Math.abs(w.totalDistanceMeters - bucket) / bucket <= 0.08)
-            .sort((a, b) => a.date.localeCompare(b.date)),
+  const bucketWorkouts = useMemo(
+    () => (bucket === null ? [] : workoutsInBucket(workouts, bucket)),
     [workouts, bucket],
   );
+  const pr = bucket !== null ? bestSplitForBucket(workouts, bucket) : null;
 
-  const splitTrend = inBucket.map((w) => ({
-    date: formatDate(w.date),
-    split: w.avgSplitSeconds500m,
-  }));
+  const chartData = useMemo(() => {
+    const trendFn =
+      bucketWorkouts.length >= 3
+        ? linearRegression(bucketWorkouts.map((w) => w.avgSplitSeconds500m))
+        : null;
+    return bucketWorkouts.map((w, i) => ({
+      date: formatDate(w.date),
+      split: w.avgSplitSeconds500m,
+      trend: trendFn ? trendFn(i) : undefined,
+      title: w.title,
+      isPR: pr?.id === w.id,
+    }));
+  }, [bucketWorkouts, pr]);
 
-  const hrTrend = inBucket
-    .filter((w) => w.avgHeartRate)
-    .map((w) => ({ date: formatDate(w.date), hr: w.avgHeartRate as number }));
+  const prPoint = chartData.find((d) => d.isPR);
 
-  const volume = useMemo(() => weeklyVolume(workouts), [workouts]);
-  const volumeData = volume.map((v) => ({
-    week: formatDate(v.weekStart),
-    km: Math.round(v.meters / 100) / 10,
-  }));
+  // --- 1. Performance overview — headline numbers a rower actually says
+  // out loud ("I got a 7:00 2k"), so these read as total elapsed time, not
+  // the average split shown in the chart below.
+  const current2k = mostRecentInBucket(workouts, 2000);
+  const pr2k = bestSplitForBucket(workouts, 2000);
+  const pr5k = bestSplitForBucket(workouts, 5000);
+  const totalMeters = workouts.reduce((sum, w) => sum + w.totalDistanceMeters, 0);
+  const monthCount = workoutsThisMonth(workouts);
 
-  const pacingPieces = inBucket.filter((w) => w.splits.length >= 2).slice(-4);
-  const maxSplitCount = Math.max(0, ...pacingPieces.map((w) => w.splits.length));
-  const pacingData = Array.from({ length: maxSplitCount }, (_, i) => {
-    const row: Record<string, number | string> = { split: `#${i + 1}` };
-    pacingPieces.forEach((w) => {
-      row[formatDate(w.date)] = w.splits[i]?.splitSeconds500m ?? null;
-    });
-    return row;
-  });
+  // --- 4. Training volume
+  const volume = volumeSummary(workouts);
+  const daily = dailyVolumeThisWeek(workouts);
 
-  const totalDistance = workouts.reduce((sum, w) => sum + w.totalDistanceMeters, 0);
-  const thisWeekStart = (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - d.getDay());
-    d.setHours(0, 0, 0, 0);
-    return d;
-  })();
-  const thisWeekDistance = workouts
-    .filter((w) => new Date(w.date) >= thisWeekStart)
-    .reduce((sum, w) => sum + w.totalDistanceMeters, 0);
+  // --- 5. Pacing analysis, most recent piece with splits
+  const pacedPiece = latestPacedPiece(workouts);
+  const pacing = pacedPiece ? pacingSummary(pacedPiece.splits) : null;
 
-  const pr = bucket ? bestSplitForBucket(workouts, bucket) : null;
+  // --- 7. Personal records
+  const records = personalRecords(workouts);
+  const thirtyMin = bestFixedTimeEffort(workouts, 1800);
+
+  // --- 8. Training insights
+  const insights = buildInsights(workouts);
+
+  // --- 3. Recent workouts
+  const recent = workouts
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 6);
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        <StatTile icon={<Activity className="h-3.5 w-3.5" aria-hidden />} label="Total workouts" value={String(workouts.length)} />
-        <StatTile icon={<Route className="h-3.5 w-3.5" aria-hidden />} label="Total distance" value={formatMeters(totalDistance)} />
-        <StatTile icon={<CalendarRange className="h-3.5 w-3.5" aria-hidden />} label="This week" value={formatMeters(thisWeekDistance)} />
+      {/* 1. Performance overview */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+        <StatTile
+          icon={<Timer className="h-3.5 w-3.5" aria-hidden />}
+          label="Current 2K"
+          value={current2k ? formatDuration(current2k.totalTimeSeconds) : "—"}
+        />
         <StatTile
           icon={<Award className="h-3.5 w-3.5" aria-hidden />}
           tone="highlight"
-          label={pr ? `${bucket}m PR` : "PR"}
-          value={pr ? formatSplit(pr.avgSplitSeconds500m) : "—"}
+          label="2K PR"
+          value={pr2k ? formatDuration(pr2k.totalTimeSeconds) : "—"}
+        />
+        <StatTile
+          icon={<Award className="h-3.5 w-3.5" aria-hidden />}
+          tone="highlight"
+          label="5K PR"
+          value={pr5k ? formatDuration(pr5k.totalTimeSeconds) : "—"}
+        />
+        <StatTile
+          icon={<Route className="h-3.5 w-3.5" aria-hidden />}
+          label="Total meters"
+          value={formatMeters(totalMeters)}
+        />
+        <StatTile
+          icon={<CalendarRange className="h-3.5 w-3.5" aria-hidden />}
+          label="Workouts this month"
+          value={String(monthCount)}
         />
       </div>
 
-      {buckets.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted">Distance</span>
-          {buckets.map((b) => (
-            <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
-              {b}m
-            </Chip>
-          ))}
+      {/* 2. 2K progress chart — the largest thing on the page */}
+      <Card className="p-4 sm:p-6" interactive>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display text-base font-semibold text-foreground">
+              {bucket ? `${bucketLabel(bucket)} progress` : "Progress"}
+            </h2>
+            <p className="text-xs text-muted">Every result, oldest to newest · lower is faster</p>
+          </div>
+          {buckets.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {buckets.map((b) => (
+                <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
+                  {bucketLabel(b)}
+                </Chip>
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      {splitTrend.length > 0 && (
-        <ChartCard title={`Split trend — ${bucket}m`} subtitle="Lower is faster">
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={splitTrend} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={380}>
+            <ComposedChart data={chartData} margin={{ top: 16, right: 24, left: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="date" tick={axisTick} />
               <YAxis
                 reversed
                 tickFormatter={(v) => formatSplit(v)}
                 tick={axisTick}
-                width={60}
+                width={64}
                 domain={["dataMin - 2", "dataMax + 2"]}
               />
-              <Tooltip formatter={(v) => [formatSplit(Number(v)), "Split /500m"]} contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="split" stroke="var(--accent)" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-      )}
-
-      {hrTrend.length > 0 && (
-        <ChartCard title={`Heart rate trend — ${bucket}m`}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={hrTrend} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="date" tick={axisTick} />
-              <YAxis tick={axisTick} width={40} domain={["dataMin - 5", "dataMax + 5"]} />
-              <Tooltip formatter={(v) => [`${Number(v)} bpm`, "Avg HR"]} contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="hr" stroke="var(--chart-4)" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-      )}
-
-      {pacingPieces.length > 0 && (
-        <ChartCard
-          title={`Pacing strategy — last ${pacingPieces.length} × ${bucket}m`}
-          subtitle="Split per interval, overlaid"
-        >
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={pacingData} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="split" tick={axisTick} />
-              <YAxis reversed tickFormatter={(v) => formatSplit(v)} tick={axisTick} width={60} />
-              <Tooltip formatter={(v) => formatSplit(Number(v))} contentStyle={tooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              {pacingPieces.map((w, i) => (
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const point = payload[0].payload as (typeof chartData)[number];
+                  return (
+                    <div style={tooltipStyle} className="px-2.5 py-2">
+                      <div className="font-medium text-foreground">{point.date}</div>
+                      <div className="tabular text-muted">{formatSplit(point.split)} /500m</div>
+                      {point.title && <div className="text-muted">{point.title}</div>}
+                      {point.isPR && (
+                        <div className="mt-0.5 font-medium text-highlight-strong">
+                          Personal best
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
+              />
+              {chartData.some((d) => d.trend !== undefined) && (
                 <Line
-                  key={w.id}
-                  type="monotone"
-                  dataKey={formatDate(w.date)}
-                  stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  connectNulls
+                  type="linear"
+                  dataKey="trend"
+                  stroke="var(--muted-soft)"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  dot={false}
+                  isAnimationActive={false}
+                  legendType="none"
                 />
-              ))}
-            </LineChart>
+              )}
+              <Line
+                type="monotone"
+                dataKey="split"
+                stroke="var(--accent)"
+                strokeWidth={2.5}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+              {prPoint && (
+                <ReferenceDot
+                  x={prPoint.date}
+                  y={prPoint.split}
+                  r={6}
+                  fill="var(--highlight)"
+                  stroke="var(--surface)"
+                  strokeWidth={2}
+                />
+              )}
+            </ComposedChart>
           </ResponsiveContainer>
-        </ChartCard>
-      )}
+        ) : (
+          <EmptyState
+            icon="📈"
+            title="No pieces logged yet"
+            description="Log a 2k, 5k, or other test piece to start a trend line here."
+          />
+        )}
+      </Card>
 
-      {volumeData.length > 0 && (
-        <ChartCard title="Weekly volume" subtitle="Kilometers per week, all workout types">
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={volumeData} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
+      {/* 3. Recent workouts */}
+      <div>
+        <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Recent workouts</h2>
+        {recent.length === 0 ? (
+          <EmptyState icon="🚣" title="Nothing logged yet" />
+        ) : (
+          <Card className="overflow-hidden">
+            <ul className="divide-y divide-border">
+              {recent.map((w) => (
+                <li key={w.id}>
+                  <Link
+                    href={`/workouts/${w.id}`}
+                    className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-background"
+                  >
+                    <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                      {w.title || WORKOUT_TYPE_SHORT[w.type]}
+                    </span>
+                    <span className="tabular shrink-0 text-muted">{resultText(w)}</span>
+                    <span className="w-16 shrink-0 text-right text-xs text-muted">
+                      {formatRelativeDate(w.date)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+      </div>
+
+      {/* 4. Training volume */}
+      <div>
+        <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Training volume</h2>
+        <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+          <StatTile
+            icon={<Route className="h-3.5 w-3.5" aria-hidden />}
+            label="This week"
+            value={formatMeters(volume.weekMeters)}
+          />
+          <StatTile
+            icon={<Route className="h-3.5 w-3.5" aria-hidden />}
+            label="This month"
+            value={formatMeters(volume.monthMeters)}
+          />
+          <StatTile
+            icon={<Route className="h-3.5 w-3.5" aria-hidden />}
+            label="This season"
+            value={formatMeters(volume.seasonMeters)}
+          />
+          <StatTile
+            icon={<Activity className="h-3.5 w-3.5" aria-hidden />}
+            label="Workouts"
+            value={String(volume.workoutCount)}
+          />
+          <StatTile
+            icon={<Gauge className="h-3.5 w-3.5" aria-hidden />}
+            label="Avg distance"
+            value={volume.workoutCount ? formatMeters(volume.avgWorkoutMeters) : "—"}
+          />
+        </div>
+        <Card className="p-4 sm:p-5" interactive>
+          <p className="mb-3 text-xs text-muted">Meters per day, this week</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={daily} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="week" tick={axisTick} />
-              <YAxis tick={axisTick} width={40} />
-              <Tooltip formatter={(v) => [`${Number(v)} km`, "Volume"]} contentStyle={tooltipStyle} />
-              <Bar dataKey="km" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              <XAxis dataKey="day" tick={axisTick} />
+              <YAxis tick={axisTick} width={48} tickFormatter={(v) => formatMeters(v)} />
+              <Tooltip formatter={(v) => [formatMeters(Number(v)), "Distance"]} contentStyle={tooltipStyle} />
+              <Bar dataKey="meters" fill="var(--accent)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </ChartCard>
-      )}
+        </Card>
+      </div>
+
+      {/* 5. Pacing analysis */}
+      <div>
+        <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Pacing analysis</h2>
+        {pacedPiece && pacing ? (
+          <Card className="overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+              <span className="text-sm font-medium text-foreground">
+                {pacedPiece.title || WORKOUT_TYPE_SHORT[pacedPiece.type]} ·{" "}
+                <span className="font-normal text-muted">{formatDate(pacedPiece.date)}</span>
+              </span>
+              <Badge tone={PACING_TONE[pacing.pacing]}>{PACING_LABELS[pacing.pacing]}</Badge>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="px-4 py-2">Range</th>
+                    <th className="px-4 py-2 text-right">Split /500m</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pacing.ranges.map((r) => (
+                    <tr key={r.index} className="border-b border-border last:border-0">
+                      <td className="px-4 py-1.5 text-muted">
+                        {formatMeters(r.startMeters)}–{formatMeters(r.endMeters)}
+                      </td>
+                      <td className="px-4 py-1.5 text-right tabular font-medium">
+                        {formatSplit(r.splitSeconds500m)}
+                        {r.index === pacing.fastest.index && (
+                          <Badge tone="faster" className="ml-2">
+                            Fastest
+                          </Badge>
+                        )}
+                        {r.index === pacing.slowest.index && (
+                          <Badge tone="slower" className="ml-2">
+                            Slowest
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="grid grid-cols-2 gap-3 px-4 py-3 text-xs text-muted sm:grid-cols-3">
+              <div>
+                Average split{" "}
+                <span className="tabular block font-medium text-foreground">
+                  {formatSplit(pacing.averageSplitSeconds500m)}
+                </span>
+              </div>
+              {pacing.strokeRateChange !== null && (
+                <div>
+                  Stroke rate, start → finish
+                  <span className="tabular block font-medium text-foreground">
+                    {pacing.strokeRateChange > 0 ? "+" : ""}
+                    {pacing.strokeRateChange.toFixed(1)} spm
+                  </span>
+                </div>
+              )}
+            </div>
+          </Card>
+        ) : (
+          <EmptyState icon="⚡" title="No multi-split pieces yet" description="Log a piece with splits to see a pacing breakdown here." />
+        )}
+      </div>
+
+      {/* 6. Goals */}
+      <div>
+        <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Goals</h2>
+        <GoalsCard goals={goals} workouts={workouts} />
+      </div>
+
+      {/* 7. Personal records */}
+      <div>
+        <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Personal records</h2>
+        {records.length === 0 && !thirtyMin ? (
+          <EmptyState icon="🏆" title="No PRs yet" description="Log a test piece at a standard distance to start tracking PRs." />
+        ) : (
+          <Card>
+            <ul className="divide-y divide-border">
+              {records.map((r) => (
+                <li key={r.bucket} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <span className="flex items-center gap-2 font-medium text-foreground">
+                    <Medal className="h-4 w-4 text-highlight" aria-hidden />
+                    {bucketLabel(r.bucket)}
+                  </span>
+                  <span className="tabular text-right">
+                    {formatDuration(r.workout.totalTimeSeconds)}{" "}
+                    <span className="text-xs text-muted">
+                      · {formatSplit(r.workout.avgSplitSeconds500m)}/500m
+                    </span>
+                  </span>
+                </li>
+              ))}
+              {thirtyMin && (
+                <li className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <span className="flex items-center gap-2 font-medium text-foreground">
+                    <Medal className="h-4 w-4 text-highlight" aria-hidden />
+                    30 min
+                  </span>
+                  <span className="tabular">{formatMeters(thirtyMin.totalDistanceMeters)}</span>
+                </li>
+              )}
+            </ul>
+          </Card>
+        )}
+      </div>
+
+      {/* 8. Training insights */}
+      <div>
+        <h2 className="mb-2 flex items-center gap-1.5 font-display text-sm font-semibold text-foreground">
+          <Sparkles className="h-4 w-4 text-accent" aria-hidden />
+          Training insights
+        </h2>
+        {insights.length === 0 ? (
+          <EmptyState
+            icon="🧠"
+            title="Not enough data yet"
+            description="Log a few more pieces and Row Tracker will start surfacing trends here."
+          />
+        ) : (
+          <Card>
+            <ul className="divide-y divide-border">
+              {insights.map((insight) => (
+                <li key={insight.id} className="flex items-start gap-2.5 px-4 py-3 text-sm text-foreground">
+                  <InsightIcon id={insight.id} />
+                  <span>{insight.text}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
 
-function ChartCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Card className="p-4 sm:p-5" interactive>
-      <div className="mb-3">
-        <h2 className="font-display text-sm font-semibold text-foreground">{title}</h2>
-        {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
-      </div>
-      {children}
-    </Card>
-  );
+function InsightIcon({ id }: { id: string }) {
+  if (id === "split-trend") return <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />;
+  if (id === "volume-trend") return <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />;
+  return <TrendingDown className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />;
+}
+
+function resultText(w: DashboardWorkout): string {
+  if (w.type === "INTERVALS" && w.splits.length > 1) {
+    return `${formatSplit(w.avgSplitSeconds500m)} avg`;
+  }
+  return formatDuration(w.totalTimeSeconds);
 }

@@ -65,3 +65,26 @@ export const teamPieceInputSchema = z.object({
 
 export type TeamEntryInput = z.infer<typeof teamEntrySchema>;
 export type TeamPieceInput = z.infer<typeof teamPieceInputSchema>;
+
+// --- Goals ------------------------------------------------------------
+
+export const goalInputSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("SPLIT_TARGET"),
+    label: z.string().max(100).optional(),
+    targetDistanceMeters: z.number().positive(),
+    targetSplitSeconds500m: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("TOTAL_METERS"),
+    label: z.string().max(100).optional(),
+    targetMeters: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("MONTHLY_WORKOUTS"),
+    label: z.string().max(100).optional(),
+    targetWorkoutsPerMonth: z.number().int().positive(),
+  }),
+]);
+
+export type GoalInput = z.infer<typeof goalInputSchema>;
