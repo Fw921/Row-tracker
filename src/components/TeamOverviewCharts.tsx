@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import {
   CartesianGrid,
   Line,
@@ -16,6 +15,7 @@ import { formatDate, formatMeters, formatRelativeDate } from "@/lib/format";
 import { formatSplit } from "@/lib/pace";
 import { bucketLabel } from "@/lib/dashboard";
 import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
+import { AthleteSheet } from "@/components/AthleteSheet";
 import {
   distinctTeamBuckets,
   teamOverview,
@@ -46,6 +46,7 @@ export function TeamOverviewCharts({
   const overview = useMemo(() => teamOverview(athletes), [athletes]);
   const buckets = useMemo(() => distinctTeamBuckets(pieceEvents), [pieceEvents]);
   const [bucket, setBucket] = useState<number | null>(buckets[0] ?? null);
+  const [selectedAthlete, setSelectedAthlete] = useState<{ id: string; name: string } | null>(null);
   const trend = useMemo(
     () => (bucket === null ? [] : teamPerformanceTrend(pieceEvents, bucket)),
     [pieceEvents, bucket],
@@ -142,9 +143,13 @@ export function TeamOverviewCharts({
                   {athleteSummaries.map((a) => (
                     <tr key={a.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
                       <td className="px-4 py-2.5">
-                        <Link href={`/history?athlete=${a.id}`} className="font-medium hover:underline">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAthlete({ id: a.id, name: a.name })}
+                          className="cursor-pointer font-medium hover:underline"
+                        >
                           {a.name}
-                        </Link>
+                        </button>
                       </td>
                       <td className="px-4 py-2.5 text-right tabular">
                         {a.current2kSeconds !== null ? formatSplit(a.current2kSeconds) : "—"}
@@ -169,9 +174,13 @@ export function TeamOverviewCharts({
               {athleteSummaries.map((a) => (
                 <li key={a.id} className="px-4 py-3">
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <Link href={`/history?athlete=${a.id}`} className="text-sm font-medium hover:underline">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAthlete({ id: a.id, name: a.name })}
+                      className="cursor-pointer text-sm font-medium hover:underline"
+                    >
                       {a.name}
-                    </Link>
+                    </button>
                     <ChangeBadge seconds={a.change2kSeconds} />
                   </div>
                   <dl className="grid grid-cols-4 gap-2 text-xs">
@@ -204,6 +213,13 @@ export function TeamOverviewCharts({
           </Card>
         )}
       </div>
+
+      <AthleteSheet
+        athleteId={selectedAthlete?.id ?? null}
+        athleteName={selectedAthlete?.name ?? ""}
+        open={selectedAthlete !== null}
+        onOpenChange={(open) => !open && setSelectedAthlete(null)}
+      />
     </div>
   );
 }

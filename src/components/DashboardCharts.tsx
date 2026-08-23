@@ -1,18 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ComposedChart,
-  Line,
-  ReferenceDot,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   Activity,
   Award,
@@ -31,6 +20,7 @@ import { formatDuration, formatSplit } from "@/lib/pace";
 import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
 import { PACING_LABELS } from "@/lib/constants";
 import { GoalsCard } from "@/components/GoalsCard";
+import { SplitTrendChart } from "@/components/SplitTrendChart";
 import type { GoalRecord } from "@/lib/goals";
 import Link from "next/link";
 import {
@@ -41,12 +31,10 @@ import {
   dailyVolumeThisWeek,
   distinctBuckets,
   latestPacedPiece,
-  linearRegression,
   mostRecentInBucket,
   pacingSummary,
   personalRecords,
   volumeSummary,
-  workoutsInBucket,
   workoutsThisMonth,
   type DashboardWorkout,
 } from "@/lib/dashboard";
@@ -76,28 +64,6 @@ export function DashboardCharts({
 }) {
   const buckets = useMemo(() => distinctBuckets(workouts), [workouts]);
   const [bucket, setBucket] = useState<number | null>(buckets[0] ?? null);
-
-  const bucketWorkouts = useMemo(
-    () => (bucket === null ? [] : workoutsInBucket(workouts, bucket)),
-    [workouts, bucket],
-  );
-  const pr = bucket !== null ? bestSplitForBucket(workouts, bucket) : null;
-
-  const chartData = useMemo(() => {
-    const trendFn =
-      bucketWorkouts.length >= 3
-        ? linearRegression(bucketWorkouts.map((w) => w.avgSplitSeconds500m))
-        : null;
-    return bucketWorkouts.map((w, i) => ({
-      date: formatDate(w.date),
-      split: w.avgSplitSeconds500m,
-      trend: trendFn ? trendFn(i) : undefined,
-      title: w.title,
-      isPR: pr?.id === w.id,
-    }));
-  }, [bucketWorkouts, pr]);
-
-  const prPoint = chartData.find((d) => d.isPR);
 
   // --- 1. Performance overview — headline numbers a rower actually says
   // out loud ("I got a 7:00 2k"), so these read as total elapsed time, not
@@ -182,75 +148,7 @@ export function DashboardCharts({
           )}
         </div>
 
-        {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={380}>
-            <ComposedChart data={chartData} margin={{ top: 16, right: 24, left: 8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="date" tick={axisTick} />
-              <YAxis
-                reversed
-                tickFormatter={(v) => formatSplit(v)}
-                tick={axisTick}
-                width={64}
-                domain={["dataMin - 2", "dataMax + 2"]}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  const point = payload[0].payload as (typeof chartData)[number];
-                  return (
-                    <div style={tooltipStyle} className="px-2.5 py-2">
-                      <div className="font-medium text-foreground">{point.date}</div>
-                      <div className="tabular text-muted">{formatSplit(point.split)} /500m</div>
-                      {point.title && <div className="text-muted">{point.title}</div>}
-                      {point.isPR && (
-                        <div className="mt-0.5 font-medium text-highlight-strong">
-                          Personal best
-                        </div>
-                      )}
-                    </div>
-                  );
-                }}
-              />
-              {chartData.some((d) => d.trend !== undefined) && (
-                <Line
-                  type="linear"
-                  dataKey="trend"
-                  stroke="var(--muted-soft)"
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                  dot={false}
-                  isAnimationActive={false}
-                  legendType="none"
-                />
-              )}
-              <Line
-                type="monotone"
-                dataKey="split"
-                stroke="var(--accent)"
-                strokeWidth={2.5}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-              />
-              {prPoint && (
-                <ReferenceDot
-                  x={prPoint.date}
-                  y={prPoint.split}
-                  r={6}
-                  fill="var(--highlight)"
-                  stroke="var(--surface)"
-                  strokeWidth={2}
-                />
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
-        ) : (
-          <EmptyState
-            icon="📈"
-            title="No pieces logged yet"
-            description="Log a 2k, 5k, or other test piece to start a trend line here."
-          />
-        )}
+        <SplitTrendChart workouts={workouts} bucket={bucket} />
       </Card>
 
       {/* 3. Recent workouts */}
