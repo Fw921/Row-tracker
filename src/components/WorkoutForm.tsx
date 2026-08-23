@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ListPlus, Save, X } from "lucide-react";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
-import { Button, Card } from "@/components/ui";
+import { Alert, Button, Card, Chip, Field, IconButton, inputClass } from "@/components/ui";
 import type { WorkoutType } from "@/generated/prisma/enums";
 
 type SplitRow = { distanceMeters: string; timeSeconds: string };
@@ -105,43 +106,43 @@ export function WorkoutForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card className="space-y-4 p-4 sm:p-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Date">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </Field>
+        <SectionLabel>Basics</SectionLabel>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Date">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className={inputClass}
+            />
+          </Field>
 
-        <Field label="Type">
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as WorkoutType)}
-            className={inputClass}
-          >
-            {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </Field>
+          <Field label="Type">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as WorkoutType)}
+              className={inputClass}
+            >
+              {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-        <Field label="Title (optional)">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={`e.g. "2k Test" or "6x500m/3'r"`}
-            className={inputClass}
-          />
-        </Field>
+          <Field label="Title" hint="optional">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={`e.g. "2k Test" or "6x500m/3'r"`}
+              className={inputClass}
+            />
+          </Field>
 
-        <Field label="Distance (meters)">
-          <div className="flex gap-2">
+          <Field label="Distance (meters)">
             <input
               type="number"
               value={distance}
@@ -150,97 +151,91 @@ export function WorkoutForm() {
               required
               className={inputClass}
             />
-          </div>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {DISTANCE_PRESETS.map((d) => (
-              <button
-                type="button"
-                key={d}
-                onClick={() => setDistance(String(d))}
-                className="rounded border border-border px-2 py-0.5 text-xs text-muted hover:bg-background"
-              >
-                {d}m
-              </button>
-            ))}
-          </div>
-        </Field>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {DISTANCE_PRESETS.map((d) => (
+                <Chip key={d} active={distance === String(d)} onClick={() => setDistance(String(d))}>
+                  {d}m
+                </Chip>
+              ))}
+            </div>
+          </Field>
 
-        <Field label="Total time (m:ss.t)">
-          <input
-            type="text"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            placeholder="6:52.4"
-            required
-            className={`${inputClass} tabular`}
-          />
-        </Field>
+          <Field label="Total time" hint="m:ss.t">
+            <input
+              type="text"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              placeholder="6:52.4"
+              required
+              className={`${inputClass} tabular`}
+            />
+          </Field>
 
-        <Field label="Avg heart rate (bpm)">
-          <input
-            type="number"
-            value={avgHeartRate}
-            onChange={(e) => setAvgHeartRate(e.target.value)}
+          <Field label="Avg heart rate" hint="bpm">
+            <input
+              type="number"
+              value={avgHeartRate}
+              onChange={(e) => setAvgHeartRate(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Max heart rate" hint="bpm">
+            <input
+              type="number"
+              value={maxHeartRate}
+              onChange={(e) => setMaxHeartRate(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Avg watts">
+            <input
+              type="number"
+              value={avgWatts}
+              onChange={(e) => setAvgWatts(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Avg stroke rate" hint="s/m">
+            <input
+              type="number"
+              value={avgStrokeRate}
+              onChange={(e) => setAvgStrokeRate(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Drag factor">
+            <input
+              type="number"
+              value={dragFactor}
+              onChange={(e) => setDragFactor(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
+        <Field label="Notes" hint="optional">
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
             className={inputClass}
           />
         </Field>
-
-        <Field label="Max heart rate (bpm)">
-          <input
-            type="number"
-            value={maxHeartRate}
-            onChange={(e) => setMaxHeartRate(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Avg watts">
-          <input
-            type="number"
-            value={avgWatts}
-            onChange={(e) => setAvgWatts(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Avg stroke rate (s/m)">
-          <input
-            type="number"
-            value={avgStrokeRate}
-            onChange={(e) => setAvgStrokeRate(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Drag factor">
-          <input
-            type="number"
-            value={dragFactor}
-            onChange={(e) => setDragFactor(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-      </div>
-
-      <Field label="Notes">
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={3}
-          className={inputClass}
-        />
-      </Field>
       </Card>
 
       <Card className="p-4 sm:p-6">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-medium">
-            Splits <span className="text-muted">(for pacing charts, optional)</span>
-          </h3>
+        <div className="mb-3 flex items-center justify-between">
+          <SectionLabel icon={<ListPlus className="h-3.5 w-3.5" aria-hidden />}>
+            Splits <span className="font-normal normal-case text-muted-soft">— for pacing charts, optional</span>
+          </SectionLabel>
           <button
             type="button"
             onClick={addSplit}
-            className="rounded-md border border-border px-2.5 py-1 text-xs hover:bg-background"
+            className="cursor-pointer rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:border-border-strong hover:bg-background"
           >
             + Add split
           </button>
@@ -249,7 +244,7 @@ export function WorkoutForm() {
           <div className="space-y-2">
             {splits.map((row, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-6 text-xs text-muted">#{i + 1}</span>
+                <span className="w-6 shrink-0 text-xs text-muted-soft">#{i + 1}</span>
                 <input
                   type="number"
                   placeholder="Distance (m)"
@@ -264,37 +259,30 @@ export function WorkoutForm() {
                   onChange={(e) => updateSplit(i, "timeSeconds", e.target.value)}
                   className={`${inputClass} tabular`}
                 />
-                <button
-                  type="button"
-                  onClick={() => removeSplit(i)}
-                  className="text-xs text-muted hover:text-foreground"
-                  aria-label={`Remove split ${i + 1}`}
-                >
-                  ✕
-                </button>
+                <IconButton label={`Remove split ${i + 1}`} tone="danger" onClick={() => removeSplit(i)}>
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                </IconButton>
               </div>
             ))}
           </div>
         )}
       </Card>
 
-      {error && <p className="text-sm text-positive">{error}</p>}
+      {error && <Alert>{error}</Alert>}
 
       <Button type="submit" disabled={submitting} size="lg">
+        <Save className="h-4 w-4" aria-hidden />
         {submitting ? "Saving…" : "Save workout"}
       </Button>
     </form>
   );
 }
 
-const inputClass =
-  "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <label className="block text-sm">
-      <span className="mb-1 block font-medium text-muted">{label}</span>
+    <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
+      {icon}
       {children}
-    </label>
+    </h3>
   );
 }

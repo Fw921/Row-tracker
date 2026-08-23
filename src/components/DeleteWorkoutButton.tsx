@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
+import { IconButton } from "@/components/ui";
 
 export function DeleteWorkoutButton({ id }: { id: string }) {
   const router = useRouter();
@@ -19,12 +21,8 @@ export function DeleteWorkoutButton({ id }: { id: string }) {
   }
 
   return (
-    <button
-      onClick={handleDelete}
-      disabled={pending}
-      className="text-xs text-muted hover:text-positive disabled:opacity-50"
-    >
-      {pending ? "…" : "Delete"}
-    </button>
+    <IconButton label="Delete workout" tone="danger" onClick={handleDelete} disabled={pending}>
+      <Trash2 className="h-3.5 w-3.5" aria-hidden />
+    </IconButton>
   );
 }

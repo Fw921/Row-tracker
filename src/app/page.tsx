@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight, Plus, Trophy } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { DashboardCharts } from "@/components/DashboardCharts";
@@ -69,16 +70,28 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
+        eyebrow="Overview"
         title="Dashboard"
-        action={<Button href="/log/team">+ Log team piece</Button>}
+        action={
+          <Button href="/log/team">
+            <Plus className="h-4 w-4" aria-hidden />
+            Log team piece
+          </Button>
+        }
       />
 
       {recentPieceGroups.length > 0 && (
         <Card className="mb-8 overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-            <h2 className="text-sm font-medium">Recent team pieces</h2>
-            <Link href="/team" className="text-xs text-accent underline">
-              See all →
+            <h2 className="flex items-center gap-1.5 text-sm font-medium">
+              <Trophy className="h-4 w-4 text-highlight" aria-hidden />
+              Recent team pieces
+            </h2>
+            <Link
+              href="/team"
+              className="flex items-center gap-0.5 text-xs font-medium text-accent hover:text-accent-strong"
+            >
+              See all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
           <ul className="divide-y divide-border">
@@ -86,7 +99,7 @@ export default async function DashboardPage() {
               <li key={pg.id}>
                 <Link
                   href={`/team/${pg.id}`}
-                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm hover:bg-background"
+                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-background"
                 >
                   <span>
                     <span className="font-medium">{pg.title || WORKOUT_TYPE_SHORT[pg.type]}</span>{" "}

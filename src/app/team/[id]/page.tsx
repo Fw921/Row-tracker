@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BarChart3, ChevronLeft, Trophy } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
@@ -37,8 +38,12 @@ export default async function TeamPieceDetailPage({
 
   return (
     <div className="max-w-3xl">
-      <Link href="/team" className="text-sm text-accent underline">
-        ← Team pieces
+      <Link
+        href="/team"
+        className="mb-2 flex items-center gap-0.5 text-sm font-medium text-accent hover:text-accent-strong"
+      >
+        <ChevronLeft className="h-4 w-4" aria-hidden />
+        Team pieces
       </Link>
 
       <PageHeader
@@ -52,8 +57,11 @@ export default async function TeamPieceDetailPage({
         action={<DeletePieceGroupButton id={pieceGroup.id} />}
       />
 
-      <Card className="mb-6 p-4">
-        <h2 className="mb-3 text-sm font-medium">Splits, fastest to slowest</h2>
+      <Card className="mb-6 p-4 sm:p-5">
+        <h2 className="mb-3 flex items-center gap-1.5 font-display text-sm font-semibold text-foreground">
+          <BarChart3 className="h-4 w-4 text-muted" aria-hidden />
+          Splits, fastest to slowest
+        </h2>
         <TeamLeaderboardChart rows={chartRows} />
       </Card>
 
@@ -61,20 +69,26 @@ export default async function TeamPieceDetailPage({
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
             <tr>
-              <th className="px-4 py-2">#</th>
-              <th className="px-4 py-2">Rower</th>
-              <th className="px-4 py-2 text-right">
+              <th className="px-4 py-2.5">#</th>
+              <th className="px-4 py-2.5">Rower</th>
+              <th className="px-4 py-2.5 text-right">
                 {pieceGroup.targetDistanceMeters ? "Time" : "Distance"}
               </th>
-              <th className="px-4 py-2 text-right">Split /500m</th>
-              <th className="px-4 py-2 text-right">Avg HR</th>
+              <th className="px-4 py-2.5 text-right">Split /500m</th>
+              <th className="px-4 py-2.5 text-right">Avg HR</th>
             </tr>
           </thead>
           <tbody>
             {pieceGroup.workouts.map((w, i) => (
-              <tr key={w.id} className="border-b border-border last:border-0">
+              <tr key={w.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
                 <td className="px-4 py-2.5 text-muted">
-                  {i === 0 ? <Badge tone="highlight">1st</Badge> : i + 1}
+                  {i === 0 ? (
+                    <Badge tone="highlight">
+                      <Trophy className="h-3 w-3" aria-hidden /> 1st
+                    </Badge>
+                  ) : (
+                    <span className="tabular pl-1.5">{i + 1}</span>
+                  )}
                 </td>
                 <td className="px-4 py-2.5">
                   <Link
@@ -90,10 +104,10 @@ export default async function TeamPieceDetailPage({
                     ? formatDuration(w.totalTimeSeconds)
                     : formatMeters(w.totalDistanceMeters)}
                 </td>
-                <td className="px-4 py-2.5 text-right tabular">
+                <td className="px-4 py-2.5 text-right tabular font-medium">
                   {formatSplit(w.avgSplitSeconds500m)}
                 </td>
-                <td className="px-4 py-2.5 text-right tabular">{w.avgHeartRate ?? "—"}</td>
+                <td className="px-4 py-2.5 text-right tabular text-muted">{w.avgHeartRate ?? "—"}</td>
               </tr>
             ))}
           </tbody>

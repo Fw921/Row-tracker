@@ -2,9 +2,21 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckSquare, Save, Square, Users } from "lucide-react";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
-import { Avatar, Button, Card } from "@/components/ui";
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  Field,
+  SegmentedControl,
+  inputClass,
+} from "@/components/ui";
 import type { WorkoutType } from "@/generated/prisma/enums";
 
 type Athlete = { id: string; name: string };
@@ -113,18 +125,20 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
 
   if (athletes.length === 0) {
     return (
-      <Card className="max-w-lg p-6 text-sm">
-        <p className="mb-3">
-          You don&apos;t have any teammates on your roster yet — add the boat first.
-        </p>
-        <Button href="/roster">Go to roster</Button>
-      </Card>
+      <div className="max-w-lg">
+        <EmptyState
+          icon="🚣"
+          title="No teammates on your roster yet"
+          description="Add the boat first, then come back to log a piece for everyone at once."
+          action={<Button href="/roster">Go to roster</Button>}
+        />
+      </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
-      <Card className="p-4">
+      <Card className="p-4 sm:p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Date">
             <input
@@ -148,7 +162,7 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
               ))}
             </select>
           </Field>
-          <Field label="Title (optional)">
+          <Field label="Title" hint="optional">
             <input
               type="text"
               value={title}
@@ -160,29 +174,21 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
         </div>
 
         <div className="mt-4 border-t border-border pt-4">
-          <span className="mb-2 block text-sm font-medium text-muted">
+          <span className="mb-2 block text-sm font-medium text-foreground">
             What&apos;s the same for everyone?
           </span>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex overflow-hidden rounded-md border border-border text-sm">
-              <button
-                type="button"
-                onClick={() => setMode("distance")}
-                className={`px-3 py-1.5 ${mode === "distance" ? "bg-accent text-accent-foreground" : "hover:bg-background"}`}
-              >
-                Same distance
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("time")}
-                className={`px-3 py-1.5 ${mode === "time" ? "bg-accent text-accent-foreground" : "hover:bg-background"}`}
-              >
-                Same time
-              </button>
-            </div>
+            <SegmentedControl
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: "distance", label: "Same distance" },
+                { value: "time", label: "Same time" },
+              ]}
+            />
 
             {mode === "distance" ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="number"
                   value={targetDistance}
@@ -192,14 +198,13 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
                 />
                 <span className="text-sm text-muted">meters</span>
                 {DISTANCE_PRESETS.map((d) => (
-                  <button
-                    type="button"
+                  <Chip
                     key={d}
+                    active={targetDistance === String(d)}
                     onClick={() => setTargetDistance(String(d))}
-                    className="rounded border border-border px-2 py-0.5 text-xs text-muted hover:bg-background"
                   >
                     {d}m
-                  </button>
+                  </Chip>
                 ))}
               </div>
             ) : (
@@ -224,13 +229,17 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-medium">Who rowed it?</h2>
+        <div className="flex items-center justify-between border-b border-border bg-background/60 px-4 py-3">
+          <h2 className="flex items-center gap-1.5 text-sm font-medium">
+            <Users className="h-4 w-4 text-muted" aria-hidden />
+            Who rowed it?
+          </h2>
           <button
             type="button"
             onClick={toggleAll}
-            className="text-xs text-accent underline underline-offset-2"
+            className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-strong"
           >
+            {allSelected ? <CheckSquare className="h-3.5 w-3.5" aria-hidden /> : <Square className="h-3.5 w-3.5" aria-hidden />}
             {allSelected ? "Deselect all" : "Select all"}
           </button>
         </div>
@@ -238,13 +247,16 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
           {athletes.map((a) => {
             const isSelected = selected.has(a.id);
             return (
-              <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
-                <label className="flex flex-1 min-w-[10rem] items-center gap-2.5">
+              <li
+                key={a.id}
+                className={`flex flex-wrap items-center gap-3 px-4 py-2.5 transition-colors ${isSelected ? "bg-accent-soft/40" : ""}`}
+              >
+                <label className="flex flex-1 min-w-[10rem] cursor-pointer items-center gap-2.5">
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleOne(a.id)}
-                    className="h-4 w-4 rounded border-border accent-accent"
+                    className="h-4 w-4 cursor-pointer rounded border-border accent-accent"
                   />
                   <Avatar name={a.name} />
                   <span className="text-sm font-medium">{a.name}</span>
@@ -277,25 +289,19 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
         </ul>
       </Card>
 
-      {error && <p className="text-sm text-positive">{error}</p>}
+      {error && <Alert>{error}</Alert>}
 
-      <Button type="submit" disabled={submitting} size="lg">
-        {submitting
-          ? "Saving…"
-          : `Save piece for ${selectedAthletes.length || 0} rower${selectedAthletes.length === 1 ? "" : "s"}`}
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={submitting} size="lg">
+          <Save className="h-4 w-4" aria-hidden />
+          {submitting ? "Saving…" : "Save piece"}
+        </Button>
+        {selectedAthletes.length > 0 && (
+          <Badge tone="accent">
+            {selectedAthletes.length} rower{selectedAthletes.length === 1 ? "" : "s"} selected
+          </Badge>
+        )}
+      </div>
     </form>
-  );
-}
-
-const inputClass =
-  "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block text-sm">
-      <span className="mb-1 block font-medium text-muted">{label}</span>
-      {children}
-    </label>
   );
 }

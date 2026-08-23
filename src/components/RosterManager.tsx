@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Button, Card, EmptyState } from "@/components/ui";
+import { Trash2, UserPlus } from "lucide-react";
+import { Alert, Avatar, Button, Card, EmptyState, IconButton, inputClass } from "@/components/ui";
 
 type Athlete = { id: string; name: string };
 
@@ -56,13 +57,16 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Add a teammate, e.g. Jordan"
-            className="flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-accent"
+            className={inputClass}
           />
-          <Button type="submit" disabled={submitting || !name.trim()}>
+          <Button type="submit" disabled={submitting || !name.trim()} className="shrink-0">
+            <UserPlus className="h-4 w-4" aria-hidden />
             {submitting ? "Adding…" : "Add"}
           </Button>
         </form>
-        {error && <p className="mt-2 text-sm text-positive">{error}</p>}
+        {error && (
+          <Alert className="mt-2">{error}</Alert>
+        )}
       </Card>
 
       {athletes.length === 0 ? (
@@ -80,13 +84,14 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
                   <Avatar name={a.name} />
                   <span className="text-sm font-medium">{a.name}</span>
                 </div>
-                <button
+                <IconButton
+                  label={`Remove ${a.name}`}
+                  tone="danger"
                   onClick={() => handleRemove(a.id)}
                   disabled={removingId === a.id}
-                  className="text-xs text-muted hover:text-positive disabled:opacity-50"
                 >
-                  {removingId === a.id ? "…" : "Remove"}
-                </button>
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                </IconButton>
               </li>
             ))}
           </ul>

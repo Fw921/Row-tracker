@@ -13,9 +13,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Activity, Award, CalendarRange, Route } from "lucide-react";
 import { formatDate, formatMeters } from "@/lib/format";
 import { formatSplit } from "@/lib/pace";
-import { Card } from "@/components/ui";
+import { Card, Chip, StatTile } from "@/components/ui";
 import {
   bestSplitForBucket,
   distinctBuckets,
@@ -23,13 +24,14 @@ import {
   type DashboardWorkout,
 } from "@/lib/dashboard";
 
-const LINE_COLORS = ["var(--accent)", "#c4622d", "#6b5fd8", "#b5451b"];
+const LINE_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
 
 const tooltipStyle = {
   background: "var(--surface)",
   border: "1px solid var(--border)",
   borderRadius: 8,
   fontSize: 12,
+  boxShadow: "var(--shadow-raised)",
 };
 const axisTick = { fontSize: 12, fill: "var(--muted)" };
 
@@ -87,31 +89,25 @@ export function DashboardCharts({ workouts }: { workouts: DashboardWorkout[] }) 
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat label="Total workouts" value={String(workouts.length)} />
-        <Stat label="Total distance" value={formatMeters(totalDistance)} />
-        <Stat label="This week" value={formatMeters(thisWeekDistance)} />
-        <Stat
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        <StatTile icon={<Activity className="h-3.5 w-3.5" aria-hidden />} label="Total workouts" value={String(workouts.length)} />
+        <StatTile icon={<Route className="h-3.5 w-3.5" aria-hidden />} label="Total distance" value={formatMeters(totalDistance)} />
+        <StatTile icon={<CalendarRange className="h-3.5 w-3.5" aria-hidden />} label="This week" value={formatMeters(thisWeekDistance)} />
+        <StatTile
+          icon={<Award className="h-3.5 w-3.5" aria-hidden />}
+          tone="highlight"
           label={pr ? `${bucket}m PR` : "PR"}
           value={pr ? formatSplit(pr.avgSplitSeconds500m) : "—"}
         />
       </div>
 
       {buckets.length > 0 && (
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted">Distance:</span>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted">Distance</span>
           {buckets.map((b) => (
-            <button
-              key={b}
-              onClick={() => setBucket(b)}
-              className={`rounded-full border px-3 py-1 ${
-                bucket === b
-                  ? "border-accent bg-accent text-accent-foreground"
-                  : "border-border text-muted hover:bg-surface"
-              }`}
-            >
+            <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
               {b}m
-            </button>
+            </Chip>
           ))}
         </div>
       )}
@@ -144,7 +140,7 @@ export function DashboardCharts({ workouts }: { workouts: DashboardWorkout[] }) 
               <XAxis dataKey="date" tick={axisTick} />
               <YAxis tick={axisTick} width={40} domain={["dataMin - 5", "dataMax + 5"]} />
               <Tooltip formatter={(v) => [`${Number(v)} bpm`, "Avg HR"]} contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="hr" stroke="#b5451b" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="hr" stroke="var(--chart-4)" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -205,21 +201,12 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="p-4">
-      <div className="mb-2">
-        <h2 className="text-sm font-medium">{title}</h2>
+    <Card className="p-4 sm:p-5" interactive>
+      <div className="mb-3">
+        <h2 className="font-display text-sm font-semibold text-foreground">{title}</h2>
         {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
       </div>
       {children}
-    </Card>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <Card className="p-3">
-      <div className="text-xs text-muted">{label}</div>
-      <div className="tabular text-lg font-semibold">{value}</div>
     </Card>
   );
 }

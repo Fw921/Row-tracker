@@ -16,7 +16,7 @@ export default async function RosterPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Team"
+        eyebrow={`Team · ${athletes.length} rower${athletes.length === 1 ? "" : "s"}`}
         title="Roster"
         description="Everyone you might log a piece for. Add the boat once, then pick from this list whenever you enter a team piece."
       />

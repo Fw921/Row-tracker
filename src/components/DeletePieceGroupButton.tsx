@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui";
 
 export function DeletePieceGroupButton({ id }: { id: string }) {
@@ -23,6 +24,7 @@ export function DeletePieceGroupButton({ id }: { id: string }) {
 
   return (
     <Button variant="danger" size="sm" onClick={handleDelete} disabled={pending}>
+      <Trash2 className="h-3.5 w-3.5" aria-hidden />
       {pending ? "Deleting…" : "Delete piece"}
     </Button>
   );

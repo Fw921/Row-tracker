@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
@@ -21,7 +22,12 @@ export default async function TeamIndexPage() {
         eyebrow="Team"
         title="Team pieces"
         description="Every piece you've logged for the whole boat at once."
-        action={<Button href="/log/team">+ Log team piece</Button>}
+        action={
+          <Button href="/log/team">
+            <Plus className="h-4 w-4" aria-hidden />
+            Log team piece
+          </Button>
+        }
       />
 
       {pieceGroups.length === 0 ? (
@@ -29,7 +35,12 @@ export default async function TeamIndexPage() {
           icon="🏁"
           title="No team pieces yet"
           description="Log the same piece for everyone at once — like calling out splits in the erg room — and it'll show up here as a leaderboard."
-          action={<Button href="/log/team">Log a team piece</Button>}
+          action={
+            <Button href="/log/team">
+              <Plus className="h-4 w-4" aria-hidden />
+              Log a team piece
+            </Button>
+          }
         />
       ) : (
         <Card>

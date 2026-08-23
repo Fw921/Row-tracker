@@ -1,21 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f6f9;
+  /* Cool paper background with a hint of green — reads as "boathouse", not
+   * generic SaaS blue-white. */
+  --background: #f3f6f4;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --border: #e3e6ec;
-  --foreground: #12161f;
-  --muted: #636d7a;
-  --accent: #0c6e64;
+  --border: #e1e7e3;
+  --border-strong: #cdd7d1;
+  --foreground: #0e1a17;
+  --muted: #5b6b65;
+  --muted-soft: #8b978f;
+
+  /* Deep racing-shell teal — richer and slightly more saturated than a flat
+   * "brand blue" so buttons/links read as a considered color, not a default. */
+  --accent: #0a6a5a;
+  --accent-strong: #054e42;
   --accent-foreground: #ffffff;
-  --accent-soft: #e3f3f0;
-  --highlight: #b8860b;
-  --highlight-soft: #fbf1de;
+  --accent-soft: #e1f2ec;
+
+  /* Brass/regatta-clock gold, for standout moments (PRs, 1st place). */
+  --highlight: #ad7f1f;
+  --highlight-strong: #7d5c14;
+  --highlight-foreground: #ffffff;
+  --highlight-soft: #f9f0dc;
+
   /* negative/positive read as "slower/faster", not good/bad, since a positive
    * split (fading) is the erg-room-bad one and a negative split is good. */
-  --negative: #1c7a4a;
-  --positive: #c24a1c;
+  --negative: #157a4f;
+  --positive: #bf4a1e;
+
+  /* Supporting hues for multi-series charts, chosen to sit alongside accent
+   * and highlight without fighting them. */
+  --chart-1: var(--accent);
+  --chart-2: var(--highlight);
+  --chart-3: #5b57b8;
+  --chart-4: #b5451b;
+  --chart-5: #3d7ea6;
+
+  --shadow-card: 0 1px 2px rgba(14, 26, 23, 0.05), 0 1px 1px rgba(14, 26, 23, 0.03);
+  --shadow-raised: 0 8px 24px -8px rgba(14, 26, 23, 0.16), 0 2px 6px -2px rgba(14, 26, 23, 0.08);
 }
 
 @theme inline {
@@ -23,34 +47,61 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-soft: var(--accent-soft);
   --color-highlight: var(--highlight);
+  --color-highlight-strong: var(--highlight-strong);
+  --color-highlight-foreground: var(--highlight-foreground);
   --color-highlight-soft: var(--highlight-soft);
   --color-negative: var(--negative);
   --color-positive: var(--positive);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0d12;
-    --surface: #12161d;
-    --surface-raised: #171c24;
-    --border: #232a35;
-    --foreground: #eef1f6;
-    --muted: #8b95a3;
-    --accent: #2fb8a8;
+    --background: #0a100e;
+    --surface: #101815;
+    --surface-raised: #141e1a;
+    --border: #223029;
+    --border-strong: #2d3f36;
+    --foreground: #eef3f0;
+    --muted: #8fa199;
+    --muted-soft: #647169;
+
+    --accent: #33bda6;
+    --accent-strong: #5fd0bc;
     --accent-foreground: #04211f;
-    --accent-soft: #133330;
-    --highlight: #e0ac3c;
-    --highlight-soft: #2c2410;
+    --accent-soft: #123330;
+
+    --highlight: #d9a942;
+    --highlight-strong: #eabf63;
+    --highlight-foreground: #241a02;
+    --highlight-soft: #2a2210;
+
     --negative: #4fd48a;
     --positive: #ff9466;
+
+    --chart-1: var(--accent);
+    --chart-2: var(--highlight);
+    --chart-3: #948dee;
+    --chart-4: #ff8f66;
+    --chart-5: #6fb6e0;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+    --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -62,4 +113,13 @@ body {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }

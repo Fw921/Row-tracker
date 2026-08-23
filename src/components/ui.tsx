@@ -1,12 +1,22 @@
 import clsx from "clsx";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 import type { ReactNode } from "react";
 
-export function Card({ className, children }: { className?: string; children: ReactNode }) {
+export function Card({
+  className,
+  children,
+  interactive,
+}: {
+  className?: string;
+  children: ReactNode;
+  interactive?: boolean;
+}) {
   return (
     <div
       className={clsx(
-        "rounded-xl border border-border bg-surface shadow-[0_1px_2px_rgba(15,23,31,0.04)]",
+        "rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]",
+        interactive && "transition-shadow hover:shadow-[var(--shadow-raised)]",
         className,
       )}
     >
@@ -30,25 +40,28 @@ export function PageHeader({
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
         {eyebrow && (
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-accent">
+          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             {eyebrow}
           </div>
         )}
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        {description && <p className="mt-1 max-w-xl text-sm text-muted">{description}</p>}
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+          {title}
+        </h1>
+        {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
       </div>
-      {action}
+      {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
     </div>
   );
 }
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface";
 const buttonSizes = { sm: "px-2.5 py-1.5 text-xs", md: "px-4 py-2", lg: "px-5 py-2.5 text-base" };
 const buttonVariants = {
-  primary: "bg-accent text-accent-foreground hover:opacity-90",
-  secondary: "border border-border bg-surface text-foreground hover:bg-background",
-  ghost: "text-muted hover:text-foreground hover:bg-surface",
+  primary: "bg-accent text-accent-foreground shadow-sm hover:bg-accent-strong",
+  secondary: "border border-border bg-surface text-foreground hover:border-border-strong hover:bg-background",
+  ghost: "text-muted hover:text-foreground hover:bg-background",
   danger: "text-positive hover:bg-positive/10",
 };
 
@@ -85,6 +98,35 @@ export function Button({
   );
 }
 
+/** Small square button for a single icon action (remove, delete, …). */
+export function IconButton({
+  className,
+  children,
+  label,
+  tone = "muted",
+  ...props
+}: {
+  className?: string;
+  children: ReactNode;
+  label: string;
+  tone?: "muted" | "danger";
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      aria-label={label}
+      title={label}
+      className={clsx(
+        "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Badge({
   children,
   tone = "neutral",
@@ -96,8 +138,8 @@ export function Badge({
 }) {
   const tones = {
     neutral: "border-border text-muted",
-    accent: "border-accent/30 bg-accent-soft text-accent",
-    highlight: "border-highlight/30 bg-highlight-soft text-highlight",
+    accent: "border-accent/25 bg-accent-soft text-accent-strong",
+    highlight: "border-highlight/30 bg-highlight-soft text-highlight-strong",
     // Named for erg pacing, not good/bad: negative split = faster finish.
     faster: "border-negative/30 bg-negative/10 text-negative",
     slower: "border-positive/30 bg-positive/10 text-positive",
@@ -105,7 +147,7 @@ export function Badge({
   return (
     <span
       className={clsx(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
         tones[tone],
         className,
       )}
@@ -127,12 +169,148 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border px-6 py-14 text-center">
-      {icon && <div className="mb-3 text-3xl">{icon}</div>}
-      <p className="font-medium text-foreground">{title}</p>
-      {description && <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>}
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
+      {icon && (
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-2xl">
+          {icon}
+        </div>
+      )}
+      <p className="font-display font-medium text-foreground">{title}</p>
+      {description && <p className="mt-1 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
+  );
+}
+
+/** Inline error/warning banner for form-level validation feedback. */
+export function Alert({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      role="alert"
+      className={clsx(
+        "flex items-start gap-2 rounded-lg border border-positive/25 bg-positive/10 px-3 py-2.5 text-sm text-positive",
+        className,
+      )}
+    >
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+      <span>{children}</span>
+    </div>
+  );
+}
+
+/** A KPI-style tile: icon, label, and a big display-face number. */
+export function StatTile({
+  icon,
+  label,
+  value,
+  tone = "default",
+}: {
+  icon?: ReactNode;
+  label: string;
+  value: string;
+  tone?: "default" | "highlight";
+}) {
+  return (
+    <Card className="p-3.5 sm:p-4">
+      <div className="mb-1.5 flex items-center gap-1.5 text-muted">
+        {icon && (
+          <span
+            className={clsx(
+              "flex h-6 w-6 items-center justify-center rounded-md",
+              tone === "highlight" ? "bg-highlight-soft text-highlight-strong" : "bg-accent-soft text-accent-strong",
+            )}
+          >
+            {icon}
+          </span>
+        )}
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
+    </Card>
+  );
+}
+
+/** Two-way (or more) toggle rendered as a single pill-shaped control. */
+export function SegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  className,
+}: {
+  options: { value: T; label: ReactNode }[];
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="tablist"
+      className={clsx(
+        "inline-flex overflow-hidden rounded-lg border border-border bg-background p-0.5 text-sm",
+        className,
+      )}
+    >
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          role="tab"
+          aria-selected={value === opt.value}
+          onClick={() => onChange(opt.value)}
+          className={clsx(
+            "cursor-pointer rounded-md px-3 py-1.5 font-medium transition-colors duration-150",
+            value === opt.value ? "bg-surface text-accent shadow-sm" : "text-muted hover:text-foreground",
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Shared text/number/date/select input styling used across every form. */
+export const inputClass =
+  "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-soft focus:border-accent focus:ring-2 focus:ring-accent/15";
+
+export function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="font-medium text-foreground">{label}</span>
+        {hint && <span className="text-xs font-normal text-muted-soft">{hint}</span>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+/** Small rounded chip button, e.g. distance presets. */
+export function Chip({
+  active,
+  className,
+  ...props
+}: { active?: boolean; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      className={clsx(
+        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150",
+        active
+          ? "border-accent bg-accent-soft text-accent-strong"
+          : "border-border text-muted hover:border-border-strong hover:bg-background",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 

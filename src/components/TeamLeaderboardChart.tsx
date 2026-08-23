@@ -5,7 +5,7 @@ import { formatSplit } from "@/lib/pace";
 
 type Row = { name: string; splitSeconds500m: number };
 
-const RANK_COLORS = ["var(--highlight)", "var(--accent)", "var(--accent)"];
+const RANK_COLORS = ["var(--highlight)", "var(--accent)"];
 
 export function TeamLeaderboardChart({ rows }: { rows: Row[] }) {
   const data = rows.map((r) => ({ name: r.name, split: r.splitSeconds500m }));
@@ -33,6 +33,7 @@ export function TeamLeaderboardChart({ rows }: { rows: Row[] }) {
             border: "1px solid var(--border)",
             borderRadius: 8,
             fontSize: 12,
+            boxShadow: "var(--shadow-raised)",
           }}
         />
         <Bar

@@ -16,7 +16,7 @@ export default async function LogTeamPiecePage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Team"
+        eyebrow="Team · new entry"
         title="Log a team piece"
         description="Set the piece up once — everyone rowed the same distance or the same time — then enter each rower's result, just like calling out splits in the erg room."
       />
