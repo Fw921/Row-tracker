@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, UserPlus } from "lucide-react";
 import { Alert, Avatar, Button, Card, EmptyState, IconButton, inputClass } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 type Athlete = { id: string; name: string };
 
@@ -13,6 +14,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -45,8 +47,11 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
       router.refresh();
     } finally {
       setRemovingId(null);
+      setConfirmingId(null);
     }
   }
+
+  const confirmingAthlete = athletes.find((a) => a.id === confirmingId);
 
   return (
     <div className="max-w-lg space-y-6">
@@ -87,7 +92,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
                 <IconButton
                   label={`Remove ${a.name}`}
                   tone="danger"
-                  onClick={() => handleRemove(a.id)}
+                  onClick={() => setConfirmingId(a.id)}
                   disabled={removingId === a.id}
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -97,6 +102,16 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
           </ul>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={confirmingId !== null}
+        onOpenChange={(open) => !open && setConfirmingId(null)}
+        onConfirm={() => confirmingId && handleRemove(confirmingId)}
+        pending={removingId !== null}
+        title={`Remove ${confirmingAthlete?.name ?? "this teammate"}?`}
+        description="They'll no longer show up when logging a team piece. Their past results stay on the record."
+        confirmLabel="Remove"
+      />
     </div>
   );
 }

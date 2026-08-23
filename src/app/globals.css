@@ -29,6 +29,10 @@
    * split (fading) is the erg-room-bad one and a negative split is good. */
   --negative: #157a4f;
   --positive: #bf4a1e;
+  /* Text-on-tint variant (e.g. Alert body, "slower" badge text) — #bf4a1e at
+   * 10% over surface only measures 4.34:1, short of the 4.5:1 AA floor for
+   * body text. This darkened value clears 5.4:1+ on that tint. */
+  --positive-strong: #a5401a;
 
   /* Supporting hues for multi-series charts, chosen to sit alongside accent
    * and highlight without fighting them. */
@@ -61,6 +65,7 @@
   --color-highlight-soft: var(--highlight-soft);
   --color-negative: var(--negative);
   --color-positive: var(--positive);
+  --color-positive-strong: var(--positive-strong);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -93,6 +98,9 @@
 
     --negative: #4fd48a;
     --positive: #ff9466;
+    /* Dark surfaces already give #ff9466 7:1+ on its own tint — no darkening
+     * needed here, unlike the light-mode value above. */
+    --positive-strong: #ff9466;
 
     --chart-1: var(--accent);
     --chart-2: var(--highlight);

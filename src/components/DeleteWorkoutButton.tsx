@@ -4,16 +4,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { IconButton } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export function DeleteWorkoutButton({ id }: { id: string }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("Delete this workout? This can't be undone.")) return;
     setPending(true);
     try {
       await fetch(`/api/workouts/${id}`, { method: "DELETE" });
+      setOpen(false);
       router.refresh();
     } finally {
       setPending(false);
@@ -21,8 +23,19 @@ export function DeleteWorkoutButton({ id }: { id: string }) {
   }
 
   return (
-    <IconButton label="Delete workout" tone="danger" onClick={handleDelete} disabled={pending}>
-      <Trash2 className="h-3.5 w-3.5" aria-hidden />
-    </IconButton>
+    <>
+      <IconButton label="Delete workout" tone="danger" onClick={() => setOpen(true)}>
+        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+      </IconButton>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={handleDelete}
+        pending={pending}
+        title="Delete this workout?"
+        description="This can't be undone."
+        confirmLabel="Delete workout"
+      />
+    </>
   );
 }

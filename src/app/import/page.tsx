@@ -5,6 +5,7 @@ export default function ImportPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
+        eyebrow="Bulk import"
         title="Import from Concept2 Logbook"
         description={
           <>

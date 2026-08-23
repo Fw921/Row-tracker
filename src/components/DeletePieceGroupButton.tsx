@@ -4,14 +4,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export function DeletePieceGroupButton({ id }: { id: string }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("Delete this team piece and everyone's results for it? This can't be undone."))
-      return;
     setPending(true);
     try {
       await fetch(`/api/piece-groups/${id}`, { method: "DELETE" });
@@ -19,13 +19,25 @@ export function DeletePieceGroupButton({ id }: { id: string }) {
       router.refresh();
     } finally {
       setPending(false);
+      setOpen(false);
     }
   }
 
   return (
-    <Button variant="danger" size="sm" onClick={handleDelete} disabled={pending}>
-      <Trash2 className="h-3.5 w-3.5" aria-hidden />
-      {pending ? "Deleting…" : "Delete piece"}
-    </Button>
+    <>
+      <Button variant="danger" size="sm" onClick={() => setOpen(true)}>
+        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+        Delete piece
+      </Button>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={handleDelete}
+        pending={pending}
+        title="Delete this team piece?"
+        description="Everyone's results for it will be deleted too. This can't be undone."
+        confirmLabel="Delete piece"
+      />
+    </>
   );
 }

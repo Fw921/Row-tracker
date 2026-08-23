@@ -66,52 +66,83 @@ export default async function TeamPieceDetailPage({
       </Card>
 
       <Card className="overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
-            <tr>
-              <th className="px-4 py-2.5">#</th>
-              <th className="px-4 py-2.5">Rower</th>
-              <th className="px-4 py-2.5 text-right">
-                {pieceGroup.targetDistanceMeters ? "Time" : "Distance"}
-              </th>
-              <th className="px-4 py-2.5 text-right">Split /500m</th>
-              <th className="px-4 py-2.5 text-right">Avg HR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pieceGroup.workouts.map((w, i) => (
-              <tr key={w.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
-                <td className="px-4 py-2.5 text-muted">
-                  {i === 0 ? (
-                    <Badge tone="highlight">
-                      <Trophy className="h-3 w-3" aria-hidden /> 1st
-                    </Badge>
-                  ) : (
-                    <span className="tabular pl-1.5">{i + 1}</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5">
-                  <Link
-                    href={`/workouts/${w.id}`}
-                    className="flex items-center gap-2 hover:underline"
-                  >
-                    <Avatar name={w.athlete?.name ?? "?"} />
-                    {w.athlete?.name ?? "Unknown"}
-                  </Link>
-                </td>
-                <td className="px-4 py-2.5 text-right tabular">
+        {/* Table — sm and up. */}
+        <div className="hidden overflow-x-auto sm:block">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
+              <tr>
+                <th className="px-4 py-2.5">#</th>
+                <th className="px-4 py-2.5">Rower</th>
+                <th className="px-4 py-2.5 text-right">
+                  {pieceGroup.targetDistanceMeters ? "Time" : "Distance"}
+                </th>
+                <th className="px-4 py-2.5 text-right">Split /500m</th>
+                <th className="px-4 py-2.5 text-right">Avg HR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pieceGroup.workouts.map((w, i) => (
+                <tr key={w.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
+                  <td className="px-4 py-2.5 text-muted">
+                    {i === 0 ? (
+                      <Badge tone="highlight">
+                        <Trophy className="h-3 w-3" aria-hidden /> 1st
+                      </Badge>
+                    ) : (
+                      <span className="tabular pl-1.5">{i + 1}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link
+                      href={`/workouts/${w.id}`}
+                      className="flex items-center gap-2 hover:underline"
+                    >
+                      <Avatar name={w.athlete?.name ?? "?"} />
+                      {w.athlete?.name ?? "Unknown"}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5 text-right tabular">
+                    {pieceGroup.targetDistanceMeters
+                      ? formatDuration(w.totalTimeSeconds)
+                      : formatMeters(w.totalDistanceMeters)}
+                  </td>
+                  <td className="px-4 py-2.5 text-right tabular font-medium">
+                    {formatSplit(w.avgSplitSeconds500m)}
+                  </td>
+                  <td className="px-4 py-2.5 text-right tabular text-muted">{w.avgHeartRate ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Stacked cards — below sm. */}
+        <ul className="divide-y divide-border sm:hidden">
+          {pieceGroup.workouts.map((w, i) => (
+            <li key={w.id} className="flex items-center gap-3 px-4 py-3">
+              <span className="w-9 shrink-0 text-center">
+                {i === 0 ? (
+                  <Trophy className="mx-auto h-4 w-4 text-highlight" aria-hidden />
+                ) : (
+                  <span className="tabular text-sm text-muted">{i + 1}</span>
+                )}
+              </span>
+              <Link href={`/workouts/${w.id}`} className="flex flex-1 items-center gap-2 min-w-0">
+                <Avatar name={w.athlete?.name ?? "?"} />
+                <span className="truncate text-sm font-medium">{w.athlete?.name ?? "Unknown"}</span>
+              </Link>
+              <div className="shrink-0 text-right">
+                <div className="tabular text-sm font-medium">{formatSplit(w.avgSplitSeconds500m)}</div>
+                <div className="tabular text-xs text-muted">
                   {pieceGroup.targetDistanceMeters
                     ? formatDuration(w.totalTimeSeconds)
                     : formatMeters(w.totalDistanceMeters)}
-                </td>
-                <td className="px-4 py-2.5 text-right tabular font-medium">
-                  {formatSplit(w.avgSplitSeconds500m)}
-                </td>
-                <td className="px-4 py-2.5 text-right tabular text-muted">{w.avgHeartRate ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  {w.avgHeartRate ? ` · ${w.avgHeartRate} bpm` : ""}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </Card>
     </div>
   );

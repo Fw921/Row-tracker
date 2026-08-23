@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ListPlus, Save, X } from "lucide-react";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
-import { Alert, Button, Card, Chip, Field, IconButton, inputClass } from "@/components/ui";
+import { Alert, Button, Card, Chip, Field, IconButton, Select, inputClass } from "@/components/ui";
 import type { WorkoutType } from "@/generated/prisma/enums";
 
 type SplitRow = { distanceMeters: string; timeSeconds: string };
@@ -119,17 +119,13 @@ export function WorkoutForm() {
           </Field>
 
           <Field label="Type">
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as WorkoutType)}
-              className={inputClass}
-            >
+            <Select value={type} onChange={(e) => setType(e.target.value as WorkoutType)}>
               {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
           <Field label="Title" hint="optional">
@@ -230,7 +226,7 @@ export function WorkoutForm() {
       <Card className="p-4 sm:p-6">
         <div className="mb-3 flex items-center justify-between">
           <SectionLabel icon={<ListPlus className="h-3.5 w-3.5" aria-hidden />}>
-            Splits <span className="font-normal normal-case text-muted-soft">— for pacing charts, optional</span>
+            Splits <span className="font-normal normal-case text-muted">— for pacing charts, optional</span>
           </SectionLabel>
           <button
             type="button"
@@ -244,7 +240,7 @@ export function WorkoutForm() {
           <div className="space-y-2">
             {splits.map((row, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-6 shrink-0 text-xs text-muted-soft">#{i + 1}</span>
+                <span className="w-6 shrink-0 text-xs text-muted">#{i + 1}</span>
                 <input
                   type="number"
                   placeholder="Distance (m)"

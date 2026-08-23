@@ -15,6 +15,7 @@ import {
   EmptyState,
   Field,
   SegmentedControl,
+  Select,
   inputClass,
 } from "@/components/ui";
 import type { WorkoutType } from "@/generated/prisma/enums";
@@ -150,17 +151,13 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
             />
           </Field>
           <Field label="Type">
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as WorkoutType)}
-              className={inputClass}
-            >
+            <Select value={type} onChange={(e) => setType(e.target.value as WorkoutType)}>
               {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="Title" hint="optional">
             <input

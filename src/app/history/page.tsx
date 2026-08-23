@@ -6,7 +6,7 @@ import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS } from "@/lib/constants";
 import { DeleteWorkoutButton } from "@/components/DeleteWorkoutButton";
-import { Avatar, Badge, Button, Card, EmptyState, PageHeader, inputClass } from "@/components/ui";
+import { Avatar, Badge, Button, Card, EmptyState, PageHeader, Select, inputClass } from "@/components/ui";
 import type { Prisma } from "@/generated/prisma/client";
 
 type SearchParams = { type?: string; from?: string; to?: string; athlete?: string };
@@ -64,18 +64,18 @@ export default async function HistoryPage({
         <form className="flex flex-wrap items-end gap-3 text-sm" method="get">
           <label className="block w-36">
             <span className="mb-1 block text-xs font-medium text-muted">Type</span>
-            <select name="type" defaultValue={params.type ?? ""} className={inputClass}>
+            <Select name="type" defaultValue={params.type ?? ""}>
               <option value="">All</option>
               {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="block w-36">
             <span className="mb-1 block text-xs font-medium text-muted">Rower</span>
-            <select name="athlete" defaultValue={params.athlete ?? ""} className={inputClass}>
+            <Select name="athlete" defaultValue={params.athlete ?? ""}>
               <option value="">Everyone</option>
               <option value="me">Me</option>
               {athletes.map((a) => (
@@ -83,7 +83,7 @@ export default async function HistoryPage({
                   {a.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label className="block w-36">
             <span className="mb-1 block text-xs font-medium text-muted">From</span>
@@ -137,61 +137,107 @@ export default async function HistoryPage({
           }
         />
       ) : (
-        <Card className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
-              <tr>
-                <th className="px-3 py-2.5">Date</th>
-                <th className="px-3 py-2.5">Rower</th>
-                <th className="px-3 py-2.5">Type</th>
-                <th className="px-3 py-2.5">Title</th>
-                <th className="px-3 py-2.5 text-right">Distance</th>
-                <th className="px-3 py-2.5 text-right">Time</th>
-                <th className="px-3 py-2.5 text-right">Split /500m</th>
-                <th className="px-3 py-2.5 text-right">Avg HR</th>
-                <th className="px-3 py-2.5"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {workouts.map((w) => (
-                <tr key={w.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
-                  <td className="px-3 py-2.5">
-                    <Link href={`/workouts/${w.id}`} className="hover:underline">
-                      {formatDate(w.date)}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <span className="flex items-center gap-2">
-                      <Avatar name={w.athlete?.name ?? "Me"} />
-                      {w.athlete?.name ?? "Me"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Badge tone="neutral">{WORKOUT_TYPE_SHORT[w.type]}</Badge>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {w.title ?? "—"}{" "}
-                    {w.source === "CONCEPT2_CSV" && (
-                      <Badge tone="accent" className="ml-1">
-                        C2
-                      </Badge>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular">
-                    {formatMeters(w.totalDistanceMeters)}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular">
-                    {formatDuration(w.totalTimeSeconds)}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular font-medium">{formatSplit(w.avgSplitSeconds500m)}</td>
-                  <td className="px-3 py-2.5 text-right tabular text-muted">{w.avgHeartRate ?? "—"}</td>
-                  <td className="px-3 py-2.5 text-right">
-                    <DeleteWorkoutButton id={w.id} />
-                  </td>
+        <Card className="overflow-hidden">
+          {/* Table — sm and up. */}
+          <div className="hidden overflow-x-auto sm:block">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-3 py-2.5">Date</th>
+                  <th className="px-3 py-2.5">Rower</th>
+                  <th className="px-3 py-2.5">Type</th>
+                  <th className="px-3 py-2.5">Title</th>
+                  <th className="px-3 py-2.5 text-right">Distance</th>
+                  <th className="px-3 py-2.5 text-right">Time</th>
+                  <th className="px-3 py-2.5 text-right">Split /500m</th>
+                  <th className="px-3 py-2.5 text-right">Avg HR</th>
+                  <th className="px-3 py-2.5"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {workouts.map((w) => (
+                  <tr key={w.id} className="border-b border-border transition-colors last:border-0 hover:bg-background">
+                    <td className="px-3 py-2.5">
+                      <Link href={`/workouts/${w.id}`} className="hover:underline">
+                        {formatDate(w.date)}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className="flex items-center gap-2">
+                        <Avatar name={w.athlete?.name ?? "Me"} />
+                        {w.athlete?.name ?? "Me"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Badge tone="neutral">{WORKOUT_TYPE_SHORT[w.type]}</Badge>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {w.title ?? "—"}{" "}
+                      {w.source === "CONCEPT2_CSV" && (
+                        <Badge tone="accent" className="ml-1">
+                          C2
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular">
+                      {formatMeters(w.totalDistanceMeters)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular">
+                      {formatDuration(w.totalTimeSeconds)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular font-medium">{formatSplit(w.avgSplitSeconds500m)}</td>
+                    <td className="px-3 py-2.5 text-right tabular text-muted">{w.avgHeartRate ?? "—"}</td>
+                    <td className="px-3 py-2.5 text-right">
+                      <DeleteWorkoutButton id={w.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Stacked cards — below sm, where a 9-column table would only scroll. */}
+          <ul className="divide-y divide-border sm:hidden">
+            {workouts.map((w) => (
+              <li key={w.id} className="px-4 py-3">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <div>
+                    <Link href={`/workouts/${w.id}`} className="text-sm font-medium hover:underline">
+                      {w.title || WORKOUT_TYPE_SHORT[w.type]}
+                    </Link>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                      {formatDate(w.date)}
+                      <Badge tone="neutral">{WORKOUT_TYPE_SHORT[w.type]}</Badge>
+                      {w.source === "CONCEPT2_CSV" && <Badge tone="accent">C2</Badge>}
+                    </div>
+                  </div>
+                  <DeleteWorkoutButton id={w.id} />
+                </div>
+                <div className="mb-2 flex items-center gap-2 text-xs text-muted">
+                  <Avatar name={w.athlete?.name ?? "Me"} />
+                  {w.athlete?.name ?? "Me"}
+                </div>
+                <dl className="grid grid-cols-4 gap-2 text-xs">
+                  <div>
+                    <dt className="text-muted">Distance</dt>
+                    <dd className="tabular font-medium">{formatMeters(w.totalDistanceMeters)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Time</dt>
+                    <dd className="tabular font-medium">{formatDuration(w.totalTimeSeconds)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Split</dt>
+                    <dd className="tabular font-medium">{formatSplit(w.avgSplitSeconds500m)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Avg HR</dt>
+                    <dd className="tabular font-medium">{w.avgHeartRate ?? "—"}</dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
         </Card>
       )}
     </div>

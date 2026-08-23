@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function Card({
@@ -63,6 +63,9 @@ const buttonVariants = {
   secondary: "border border-border bg-surface text-foreground hover:border-border-strong hover:bg-background",
   ghost: "text-muted hover:text-foreground hover:bg-background",
   danger: "text-positive hover:bg-positive/10",
+  // Filled, for the affirmative action of a destructive confirm dialog —
+  // "danger" alone reads as too light-weight next to a bordered Cancel.
+  dangerSolid: "bg-positive text-white shadow-sm hover:bg-positive-strong",
 };
 
 type ButtonProps = {
@@ -142,7 +145,9 @@ export function Badge({
     highlight: "border-highlight/30 bg-highlight-soft text-highlight-strong",
     // Named for erg pacing, not good/bad: negative split = faster finish.
     faster: "border-negative/30 bg-negative/10 text-negative",
-    slower: "border-positive/30 bg-positive/10 text-positive",
+    // text-positive-strong, not text-positive: positive on its own 10% tint
+    // only measures 4.34:1, short of the 4.5:1 AA floor for body text.
+    slower: "border-positive/30 bg-positive/10 text-positive-strong",
   };
   return (
     <span
@@ -188,7 +193,7 @@ export function Alert({ children, className }: { children: ReactNode; className?
     <div
       role="alert"
       className={clsx(
-        "flex items-start gap-2 rounded-lg border border-positive/25 bg-positive/10 px-3 py-2.5 text-sm text-positive",
+        "flex items-start gap-2 rounded-lg border border-positive/25 bg-positive/10 px-3 py-2.5 text-sm text-positive-strong",
         className,
       )}
     >
@@ -258,7 +263,7 @@ export function SegmentedControl<T extends string>({
           aria-selected={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={clsx(
-            "cursor-pointer rounded-md px-3 py-1.5 font-medium transition-colors duration-150",
+            "cursor-pointer rounded-md px-3 py-1.5 font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
             value === opt.value ? "bg-surface text-accent shadow-sm" : "text-muted hover:text-foreground",
           )}
         >
@@ -273,6 +278,30 @@ export function SegmentedControl<T extends string>({
 export const inputClass =
   "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-soft focus:border-accent focus:ring-2 focus:ring-accent/15";
 
+/** A native <select> with a custom chevron so it matches the text/date
+ * inputs visually — still a real <select> underneath for accessibility and
+ * mobile-native pickers, just with the browser's own arrow hidden. */
+export function Select({
+  className,
+  children,
+  ...props
+}: { className?: string } & React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select
+        className={clsx(inputClass, "appearance-none pr-8", className)}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
 export function Field({
   label,
   hint,
@@ -286,7 +315,9 @@ export function Field({
     <label className="block text-sm">
       <span className="mb-1 flex items-baseline justify-between gap-2">
         <span className="font-medium text-foreground">{label}</span>
-        {hint && <span className="text-xs font-normal text-muted-soft">{hint}</span>}
+        {/* text-muted, not text-muted-soft: muted-soft only clears 3:1 on
+         * surface, short of the 4.5:1 AA floor for this size of body text. */}
+        {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
       </span>
       {children}
     </label>
@@ -303,7 +334,7 @@ export function Chip({
     <button
       type="button"
       className={clsx(
-        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150",
+        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
         active
           ? "border-accent bg-accent-soft text-accent-strong"
           : "border-border text-muted hover:border-border-strong hover:bg-background",
@@ -311,6 +342,55 @@ export function Chip({
       )}
       {...props}
     />
+  );
+}
+
+/** Pulsing placeholder block for loading.tsx skeletons. Pass a Tailwind
+ * height/width via className, e.g. <Skeleton className="h-4 w-24" />. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={clsx("animate-pulse rounded-md bg-border/70", className)} aria-hidden />;
+}
+
+/** Skeleton for a PageHeader — title, eyebrow, and description bars. */
+export function PageHeaderSkeleton({ withAction }: { withAction?: boolean }) {
+  return (
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      {withAction && <Skeleton className="h-9 w-36 rounded-lg" />}
+    </div>
+  );
+}
+
+/** Skeleton for a row of StatTile-shaped cards. */
+export function StatGridSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      {Array.from({ length: count }, (_, i) => (
+        <Card key={i} className="p-3.5 sm:p-4">
+          <Skeleton className="mb-2 h-5 w-5 rounded-md" />
+          <Skeleton className="h-6 w-16" />
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/** Skeleton for a Card full of rows, e.g. a table or list about to load. */
+export function CardListSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <Card className="divide-y divide-border overflow-hidden">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex items-center gap-3 px-4 py-3">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 flex-1 max-w-xs" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </Card>
   );
 }
 
