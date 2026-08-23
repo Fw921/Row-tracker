@@ -1,38 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8fa;
+  --background: #f5f6f9;
   --surface: #ffffff;
-  --border: #e2e5ea;
-  --foreground: #14181f;
-  --muted: #5b6472;
-  --accent: #0f6e6e;
+  --surface-raised: #ffffff;
+  --border: #e3e6ec;
+  --foreground: #12161f;
+  --muted: #636d7a;
+  --accent: #0c6e64;
   --accent-foreground: #ffffff;
+  --accent-soft: #e3f3f0;
+  --highlight: #b8860b;
+  --highlight-soft: #fbf1de;
+  /* negative/positive read as "slower/faster", not good/bad, since a positive
+   * split (fading) is the erg-room-bad one and a negative split is good. */
   --negative: #1c7a4a;
-  --positive: #b5451b;
+  --positive: #c24a1c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-highlight: var(--highlight);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-negative: var(--negative);
+  --color-positive: var(--positive);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0e12;
-    --surface: #12161c;
-    --border: #232932;
-    --foreground: #eef1f5;
-    --muted: #90989f;
-    --accent: #35b8ab;
+    --background: #0a0d12;
+    --surface: #12161d;
+    --surface-raised: #171c24;
+    --border: #232a35;
+    --foreground: #eef1f6;
+    --muted: #8b95a3;
+    --accent: #2fb8a8;
     --accent-foreground: #04211f;
+    --accent-soft: #133330;
+    --highlight: #e0ac3c;
+    --highlight-soft: #2c2410;
     --negative: #4fd48a;
     --positive: #ff9466;
   }
@@ -41,7 +57,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 .tabular {

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button, Card } from "@/components/ui";
 
 type ImportSummary = {
   imported: number;
@@ -50,26 +51,24 @@ export function ImportForm() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-accent-foreground"
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
-        >
-          {submitting ? "Importing…" : "Import"}
-        </button>
-      </form>
+      <Card className="p-4 sm:p-6">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-accent-foreground"
+          />
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Importing…" : "Import"}
+          </Button>
+        </form>
+      </Card>
 
       {error && <p className="text-sm text-positive">{error}</p>}
 
       {summary && (
-        <div className="rounded-md border border-border bg-surface p-4 text-sm">
+        <Card className="p-4 text-sm">
           <p className="font-medium">
             Imported {summary.imported} workout{summary.imported === 1 ? "" : "s"}.
             {summary.skippedCount > 0 && ` Skipped ${summary.skippedCount}.`}
@@ -86,7 +85,7 @@ export function ImportForm() {
           <a href="/history" className="mt-3 inline-block text-accent underline">
             View imported workouts →
           </a>
-        </div>
+        </Card>
       )}
     </div>
   );

@@ -26,12 +26,18 @@ rewrite. See [Roadmap](#roadmap) below.
   reports which rows it had to skip and why. Note: Concept2's bulk export
   doesn't include per-500m splits, so imported pieces won't have a pacing
   breakdown unless you add splits by hand afterward.
-- **History** — filterable/sortable table of everything you've logged,
-  with delete.
+- **History** — filterable/sortable table of everything logged, by anyone
+  on the roster, with delete.
 - **Dashboard** — split-time trend for a chosen distance (2k, 5k, ...),
   heart rate trend, pacing-strategy comparison (splits overlaid across
   your last few pieces at a distance), weekly training volume, and a PR
-  card per distance.
+  card per distance. Scoped to your own pieces — a teammate's team-piece
+  result doesn't blend into your trend.
+- **Roster & team pieces** — add teammates to a roster, then log one piece
+  for the whole boat at once: set the shared distance or time (e.g.
+  "everyone rows 2k"), pick who rowed it, and enter each person's result
+  in a table — like calling out splits in the erg room. Produces a
+  fastest-to-slowest leaderboard for that piece.
 
 ## Getting started
 
@@ -82,6 +88,11 @@ for this app.
   each interval of a 6x500m), used for the pacing charts.
 - `ImportBatch` — one CSV upload, so imported workouts trace back to the
   file they came from.
+- `Athlete` — a teammate on the account owner's roster. Not a login, just
+  a name to attribute results to.
+- `PieceGroup` — one "everybody rows the same piece" event: the shared
+  distance or time, with one `Workout` per rower hanging off it (via
+  `Workout.pieceGroupId`) for the leaderboard view.
 
 See `prisma/schema.prisma` for the full schema.
 

@@ -5,9 +5,12 @@ import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS } from "@/lib/constants";
 import { DeleteWorkoutButton } from "@/components/DeleteWorkoutButton";
+import { Avatar, Badge, Button, Card, EmptyState, PageHeader } from "@/components/ui";
 import type { Prisma } from "@/generated/prisma/client";
 
-type SearchParams = { type?: string; from?: string; to?: string };
+type SearchParams = { type?: string; from?: string; to?: string; athlete?: string };
+
+export const dynamic = "force-dynamic";
 
 export default async function HistoryPage({
   searchParams,
@@ -25,20 +28,31 @@ export default async function HistoryPage({
       ...(params.to ? { lte: new Date(params.to) } : {}),
     };
   }
+  if (params.athlete === "me") where.athleteId = null;
+  else if (params.athlete) where.athleteId = params.athlete;
 
-  const workouts = await prisma.workout.findMany({
-    where,
-    orderBy: { date: "desc" },
-  });
+  const [workouts, athletes] = await Promise.all([
+    prisma.workout.findMany({
+      where,
+      orderBy: { date: "desc" },
+      include: { athlete: true },
+    }),
+    prisma.athlete.findMany({
+      where: { userId: user.id, archived: false },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  const hasFilters = params.type || params.from || params.to || params.athlete;
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">History</h1>
-        <Link href="/log" className="text-sm text-accent underline">
-          + Log workout
-        </Link>
-      </div>
+      <PageHeader
+        title="History"
+        description="Everything logged — your own pieces and every team piece."
+        action={<Button href="/log">+ Log workout</Button>}
+      />
 
       <form className="mb-4 flex flex-wrap items-end gap-3 text-sm" method="get">
         <label className="block">
@@ -52,6 +66,22 @@ export default async function HistoryPage({
             {Object.entries(WORKOUT_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-muted">Rower</span>
+          <select
+            name="athlete"
+            defaultValue={params.athlete ?? ""}
+            className="rounded-md border border-border bg-surface px-2 py-1"
+          >
+            <option value="">Everyone</option>
+            <option value="me">Me</option>
+            {athletes.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
               </option>
             ))}
           </select>
@@ -76,11 +106,11 @@ export default async function HistoryPage({
         </label>
         <button
           type="submit"
-          className="rounded-md border border-border px-3 py-1.5 hover:bg-surface"
+          className="rounded-md border border-border px-3 py-1.5 hover:bg-background"
         >
           Filter
         </button>
-        {(params.type || params.from || params.to) && (
+        {hasFilters && (
           <Link href="/history" className="px-2 py-1.5 text-muted underline">
             Clear
           </Link>
@@ -88,16 +118,32 @@ export default async function HistoryPage({
       </form>
 
       {workouts.length === 0 ? (
-        <p className="text-sm text-muted">
-          No workouts yet. <Link href="/log" className="text-accent underline">Log one</Link> or{" "}
-          <Link href="/import" className="text-accent underline">import a CSV</Link>.
-        </p>
+        <EmptyState
+          icon="🚣"
+          title={hasFilters ? "No workouts match those filters" : "No workouts yet"}
+          description={
+            hasFilters
+              ? "Try clearing a filter."
+              : "Log one yourself, import a Concept2 CSV, or log a team piece."
+          }
+          action={
+            !hasFilters && (
+              <div className="flex gap-2">
+                <Button href="/log">Log a workout</Button>
+                <Button href="/import" variant="secondary">
+                  Import CSV
+                </Button>
+              </div>
+            )
+          }
+        />
       ) : (
-        <div className="overflow-x-auto rounded-md border border-border">
+        <Card className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-surface text-xs uppercase tracking-wide text-muted">
+            <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2">Rower</th>
                 <th className="px-3 py-2">Type</th>
                 <th className="px-3 py-2">Title</th>
                 <th className="px-3 py-2 text-right">Distance</th>
@@ -109,14 +155,27 @@ export default async function HistoryPage({
             </thead>
             <tbody>
               {workouts.map((w) => (
-                <tr key={w.id} className="border-b border-border last:border-0 hover:bg-surface">
+                <tr key={w.id} className="border-b border-border last:border-0 hover:bg-background">
                   <td className="px-3 py-2">
                     <Link href={`/workouts/${w.id}`} className="hover:underline">
                       {formatDate(w.date)}
                     </Link>
                   </td>
+                  <td className="px-3 py-2">
+                    <span className="flex items-center gap-2">
+                      <Avatar name={w.athlete?.name ?? "Me"} />
+                      {w.athlete?.name ?? "Me"}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-muted">{WORKOUT_TYPE_SHORT[w.type]}</td>
-                  <td className="px-3 py-2">{w.title ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    {w.title ?? "—"}{" "}
+                    {w.source === "CONCEPT2_CSV" && (
+                      <Badge tone="neutral" className="ml-1">
+                        C2
+                      </Badge>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-right tabular">
                     {formatMeters(w.totalDistanceMeters)}
                   </td>
@@ -132,7 +191,7 @@ export default async function HistoryPage({
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </div>
   );

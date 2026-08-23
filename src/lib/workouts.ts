@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { splitPer500m } from "@/lib/pace";
-import type { WorkoutInput } from "@/lib/validation";
+import { resolveTeamEntryTotals, splitPer500m } from "@/lib/pace";
+import type { TeamPieceInput, WorkoutInput } from "@/lib/validation";
 import type { DataSource } from "@/generated/prisma/client";
 
 /**
@@ -52,5 +52,57 @@ export async function createWorkout(
         : undefined,
     },
     include: { splits: { orderBy: { index: "asc" } } },
+  });
+}
+
+/**
+ * Create a "team piece": one PieceGroup (the shared distance/time everyone
+ * rowed) plus one Workout per rower, each with their own result for the
+ * varying side of that piece. Mirrors what a coxswain writes on the erg
+ * room whiteboard — same piece, everyone's individual split.
+ */
+export async function createTeamPiece(userId: string, input: TeamPieceInput) {
+  return prisma.$transaction(async (tx) => {
+    const pieceGroup = await tx.pieceGroup.create({
+      data: {
+        userId,
+        date: new Date(input.date),
+        type: input.type,
+        title: input.title,
+        targetDistanceMeters: input.mode === "distance" ? input.target : undefined,
+        targetTimeSeconds: input.mode === "time" ? input.target : undefined,
+      },
+    });
+
+    const workouts = [];
+    for (const entry of input.entries) {
+      const { totalDistanceMeters, totalTimeSeconds } = resolveTeamEntryTotals(
+        input.mode,
+        input.target,
+        entry.value,
+      );
+
+      const workout = await tx.workout.create({
+        data: {
+          userId,
+          date: new Date(input.date),
+          type: input.type,
+          title: input.title,
+          totalDistanceMeters,
+          totalTimeSeconds,
+          avgSplitSeconds500m: splitPer500m(totalDistanceMeters, totalTimeSeconds),
+          avgWatts: entry.avgWatts,
+          avgHeartRate: entry.avgHeartRate,
+          avgStrokeRate: entry.avgStrokeRate,
+          notes: entry.notes,
+          source: "MANUAL",
+          athleteId: entry.athleteId,
+          pieceGroupId: pieceGroup.id,
+        },
+      });
+      workouts.push(workout);
+    }
+
+    return { pieceGroup, workouts };
   });
 }

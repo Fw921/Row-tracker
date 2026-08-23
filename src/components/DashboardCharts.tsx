@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { formatDate, formatMeters } from "@/lib/format";
 import { formatSplit } from "@/lib/pace";
+import { Card } from "@/components/ui";
 import {
   bestSplitForBucket,
   distinctBuckets,
@@ -204,21 +205,21 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-md border border-border bg-surface p-4">
+    <Card className="p-4">
       <div className="mb-2">
         <h2 className="text-sm font-medium">{title}</h2>
         {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
       </div>
       {children}
-    </div>
+    </Card>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border bg-surface p-3">
+    <Card className="p-3">
       <div className="text-xs text-muted">{label}</div>
       <div className="tabular text-lg font-semibold">{value}</div>
-    </div>
+    </Card>
   );
 }

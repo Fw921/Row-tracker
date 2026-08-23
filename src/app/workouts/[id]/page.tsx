@@ -7,6 +7,16 @@ import { formatDuration, formatSplit, classifyPacing } from "@/lib/pace";
 import { PACING_LABELS } from "@/lib/constants";
 import { SplitChart } from "@/components/SplitChart";
 import { DeleteWorkoutButton } from "@/components/DeleteWorkoutButton";
+import { Avatar, Badge, Card, PageHeader } from "@/components/ui";
+
+export const dynamic = "force-dynamic";
+
+const PACING_TONE: Record<string, "faster" | "slower" | "neutral"> = {
+  negative: "faster",
+  positive: "slower",
+  even: "neutral",
+  unknown: "neutral",
+};
 
 export default async function WorkoutDetailPage({
   params,
@@ -18,7 +28,11 @@ export default async function WorkoutDetailPage({
 
   const workout = await prisma.workout.findFirst({
     where: { id, userId: user.id },
-    include: { splits: { orderBy: { index: "asc" } } },
+    include: {
+      splits: { orderBy: { index: "asc" } },
+      athlete: true,
+      pieceGroup: true,
+    },
   });
 
   if (!workout) notFound();
@@ -27,21 +41,25 @@ export default async function WorkoutDetailPage({
 
   return (
     <div className="max-w-3xl">
-      <Link href="/history" className="text-sm text-accent underline">
-        ← History
+      <Link
+        href={workout.pieceGroup ? `/team/${workout.pieceGroup.id}` : "/history"}
+        className="text-sm text-accent underline"
+      >
+        ← {workout.pieceGroup ? "Team piece" : "History"}
       </Link>
 
-      <div className="mt-2 mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">
-            {workout.title || WORKOUT_TYPE_SHORT[workout.type]}
-          </h1>
-          <p className="text-sm text-muted">
-            {formatDate(workout.date)} · {WORKOUT_TYPE_SHORT[workout.type]} ·{" "}
-            {workout.source === "CONCEPT2_CSV" ? "Imported from Concept2" : "Manual entry"}
-          </p>
-        </div>
-        <DeleteWorkoutButton id={workout.id} />
+      <PageHeader
+        eyebrow={WORKOUT_TYPE_SHORT[workout.type]}
+        title={workout.title || WORKOUT_TYPE_SHORT[workout.type]}
+        description={`${formatDate(workout.date)} · ${
+          workout.source === "CONCEPT2_CSV" ? "Imported from Concept2" : "Manual entry"
+        }`}
+        action={<DeleteWorkoutButton id={workout.id} />}
+      />
+
+      <div className="mb-6 flex items-center gap-2">
+        <Avatar name={workout.athlete?.name ?? "Me"} />
+        <span className="text-sm font-medium">{workout.athlete?.name ?? "Me"}</span>
       </div>
 
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -59,23 +77,23 @@ export default async function WorkoutDetailPage({
       </div>
 
       {workout.notes && (
-        <p className="mb-8 rounded-md border border-border bg-surface p-3 text-sm">
+        <Card className="mb-8 p-3 text-sm">
           {workout.notes}
-        </p>
+        </Card>
       )}
 
       {workout.splits.length > 0 && (
         <div className="mb-8">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-medium">Pacing</h2>
-            <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-              {PACING_LABELS[pacing]}
-            </span>
+            <Badge tone={PACING_TONE[pacing]}>{PACING_LABELS[pacing]}</Badge>
           </div>
-          <SplitChart splits={workout.splits} />
-          <div className="mt-3 overflow-x-auto rounded-md border border-border">
+          <Card className="p-4">
+            <SplitChart splits={workout.splits} />
+          </Card>
+          <Card className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-surface text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-border bg-background text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-3 py-1.5">#</th>
                   <th className="px-3 py-1.5 text-right">Distance</th>
@@ -102,7 +120,7 @@ export default async function WorkoutDetailPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
         </div>
       )}
     </div>
@@ -111,9 +129,9 @@ export default async function WorkoutDetailPage({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border bg-surface p-3">
+    <Card className="p-3">
       <div className="text-xs text-muted">{label}</div>
       <div className="tabular text-lg font-semibold">{value}</div>
-    </div>
+    </Card>
   );
 }

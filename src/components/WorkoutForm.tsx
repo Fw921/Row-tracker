@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
+import { Button, Card } from "@/components/ui";
 import type { WorkoutType } from "@/generated/prisma/enums";
 
 type SplitRow = { distanceMeters: string; timeSeconds: string };
@@ -103,6 +104,7 @@ export function WorkoutForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <Card className="space-y-4 p-4 sm:p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Date">
           <input
@@ -228,8 +230,9 @@ export function WorkoutForm() {
           className={inputClass}
         />
       </Field>
+      </Card>
 
-      <div>
+      <Card className="p-4 sm:p-6">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-medium">
             Splits <span className="text-muted">(for pacing charts, optional)</span>
@@ -273,17 +276,13 @@ export function WorkoutForm() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
 
       {error && <p className="text-sm text-positive">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
-      >
+      <Button type="submit" disabled={submitting} size="lg">
         {submitting ? "Saving…" : "Save workout"}
-      </button>
+      </Button>
     </form>
   );
 }
