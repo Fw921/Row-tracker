@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Utility classes only (animate-in/out, fade-*, zoom-*) — used by the Radix
+ * AlertDialog in src/components/ui/alert-dialog.tsx. Defines no colors or
+ * design tokens, so it can't clash with the palette below. */
+@import "tw-animate-css";
 
 :root {
   /* Cool paper background with a hint of green — reads as "boathouse", not

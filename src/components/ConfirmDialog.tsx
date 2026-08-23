@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui";
+import { TriangleAlert } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-/** Themed replacement for window.confirm(), built on the native <dialog>
- * element — gets focus-trapping, Escape-to-close, and the ::backdrop for
- * free, styled to match the rest of the app instead of the browser chrome. */
+/** Themed replacement for window.confirm(), built on Radix's AlertDialog
+ * (via shadcn/21st.dev, restyled onto this app's own tokens — see
+ * src/components/ui/alert-dialog.tsx) instead of a hand-rolled one: real
+ * focus-trapping, portal rendering, and Escape/outside-click handling. */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -24,45 +33,33 @@ export function ConfirmDialog({
   confirmLabel?: string;
   pending?: boolean;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={ref}
-      onCancel={(e) => {
-        e.preventDefault();
-        onOpenChange(false);
-      }}
-      onClose={() => onOpenChange(false)}
-      onClick={(e) => {
-        // Click landed on the dialog element itself, not its content — that
-        // only happens via the ::backdrop area (light-dismiss).
-        if (e.target === e.currentTarget) onOpenChange(false);
-      }}
-      className="m-auto w-[min(24rem,calc(100vw-2rem))] rounded-xl border border-border bg-surface p-0 text-foreground shadow-[var(--shadow-raised)] backdrop:bg-foreground/30 backdrop:backdrop-blur-[2px]"
-    >
-      <div className="p-5">
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-positive/10 text-positive-strong">
-          <AlertTriangle className="h-5 w-5" aria-hidden />
-        </div>
-        <h2 className="font-display text-base font-semibold text-foreground">{title}</h2>
-        {description && <p className="mt-1.5 text-sm leading-relaxed text-muted">{description}</p>}
-      </div>
-      <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
-        <Button type="button" variant="secondary" size="sm" onClick={() => onOpenChange(false)} disabled={pending}>
-          Cancel
-        </Button>
-        <Button type="button" variant="dangerSolid" size="sm" onClick={onConfirm} disabled={pending}>
-          {pending ? "Working…" : confirmLabel}
-        </Button>
-      </div>
-    </dialog>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-positive/10 text-positive-strong">
+            <TriangleAlert className="h-5 w-5" aria-hidden />
+          </div>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            variant="dangerSolid"
+            disabled={pending}
+            onClick={(e) => {
+              // Keep the dialog open (with a pending label) until the async
+              // delete actually finishes, instead of Radix's default
+              // close-on-click.
+              e.preventDefault();
+              onConfirm();
+            }}
+          >
+            {pending ? "Working…" : confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

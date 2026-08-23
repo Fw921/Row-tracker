@@ -68,6 +68,21 @@ const buttonVariants = {
   dangerSolid: "bg-positive text-white shadow-sm hover:bg-positive-strong",
 };
 
+/** The class string a Button of this variant/size renders — exported so
+ * non-Button elements (e.g. Radix's asChild-composed AlertDialogAction)
+ * can look identical without a second button styling system. */
+export function buttonClassName({
+  variant = "primary",
+  size = "md",
+  className,
+}: {
+  variant?: keyof typeof buttonVariants;
+  size?: keyof typeof buttonSizes;
+  className?: string;
+} = {}) {
+  return clsx(buttonBase, buttonSizes[size], buttonVariants[variant], className);
+}
+
 type ButtonProps = {
   variant?: keyof typeof buttonVariants;
   size?: keyof typeof buttonSizes;
@@ -85,7 +100,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const cls = clsx(buttonBase, buttonSizes[size], buttonVariants[variant], className);
+  const cls = buttonClassName({ variant, size, className });
   if ("href" in props && props.href !== undefined) {
     const { href, ...rest } = props as { href: string };
     return (
