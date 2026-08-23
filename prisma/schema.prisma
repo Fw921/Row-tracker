@@ -1,0 +1,124 @@
+// Prisma schema for Row Tracker — a rowing performance analytics platform.
+//
+// The MVP runs single-user (everything hangs off one seeded `User` row,
+// no auth yet), but every table is already keyed by `userId` so adding
+// real accounts later is additive, not a rewrite.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A rower. Single row for now; ready for multi-user auth later.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  workouts      Workout[]
+  importBatches ImportBatch[]
+
+  @@map("users")
+}
+
+/// How a workout's data got into the system.
+enum DataSource {
+  MANUAL
+  CONCEPT2_CSV
+}
+
+/// Shape of the logged session, drives which fields/charts make sense.
+enum WorkoutType {
+  SINGLE_DISTANCE // e.g. a 2k or 5k test piece, fixed meters
+  SINGLE_TIME // e.g. a 30' steady state, fixed duration
+  INTERVALS // e.g. 4x500m/3'r
+  STEADY_STATE // continuous, unbroken row
+  OTHER
+}
+
+/// One logged erg session — a test piece, a steady state row, an interval
+/// workout, etc. Aggregate totals live here; per-split detail (for pacing
+/// comparisons) lives in `Split`.
+model Workout {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date        DateTime
+  type        WorkoutType
+  title       String? // e.g. "2k Test", "6x500m/3'r" — free text label
+  description String?
+
+  totalDistanceMeters Float // sum across all work intervals
+  totalTimeSeconds    Float // sum across all work intervals, elapsed erg time
+  avgSplitSeconds500m Float // derived: totalTimeSeconds / totalDistanceMeters * 500
+
+  avgWatts       Float?
+  avgHeartRate   Int?
+  maxHeartRate   Int?
+  avgStrokeRate  Float?
+  dragFactor     Int?
+  calories       Float?
+
+  source        DataSource @default(MANUAL)
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+
+  notes String?
+
+  splits Split[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@map("workouts")
+}
+
+/// A sub-piece within a workout: one interval's work, or one pacing split
+/// (e.g. each 500m of a 2k). Lets us chart negative/positive splits and
+/// compare pacing strategy across pieces of the same nominal distance.
+model Split {
+  id        String  @id @default(cuid())
+  workoutId String
+  workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  index           Int // 1-based order within the workout
+  distanceMeters  Float
+  timeSeconds     Float
+  splitSeconds500m Float // derived: timeSeconds / distanceMeters * 500
+
+  restTimeSeconds    Float?
+  restDistanceMeters Float?
+
+  avgWatts      Float?
+  avgHeartRate  Int?
+  avgStrokeRate Float?
+
+  @@unique([workoutId, index])
+  @@map("splits")
+}
+
+/// One CSV upload event, so imported workouts can be traced back to the
+/// file they came from (and re-import can be made idempotent later).
+model ImportBatch {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  source     DataSource
+  filename   String
+  rowCount   Int
+  importedAt DateTime @default(now())
+
+  workouts Workout[]
+
+  @@map("import_batches")
+}
