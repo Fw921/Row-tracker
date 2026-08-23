@@ -17,6 +17,7 @@ import {
 import { Badge, Button, Card, initialsAvatarStyle } from "@/components/ui";
 import { LandingDemoChart } from "@/components/LandingDemoChart";
 import { WORKOUT_TYPE_LABELS } from "@/lib/constants";
+import { formatSplit } from "@/lib/pace";
 
 export const metadata: Metadata = {
   title: "Row Tracker — Every stroke, tracked",
@@ -56,6 +57,17 @@ const WORKOUT_PREVIEWS: {
   },
 ];
 
+/** Six sample splits (seconds/500m) for the hero proof card — same shape
+ * of number the real PR card on the dashboard shows, lower is faster. */
+const HERO_SPLITS = [118.4, 116.1, 114.8, 112.9, 111.5, 109.7];
+const HERO_MIN = Math.min(...HERO_SPLITS);
+const HERO_MAX = Math.max(...HERO_SPLITS);
+/** Bar height as a percent, inverted so a faster (lower) split reads taller. */
+function heroBarHeight(splitSeconds: number) {
+  const range = HERO_MAX - HERO_MIN || 1;
+  return 28 + ((HERO_MAX - splitSeconds) / range) * 72;
+}
+
 const CREW = [
   { name: "Jordan Ade", seat: "Stroke", split: "1:52.3" },
   { name: "Sam Ruiz", seat: "3 Seat", split: "1:55.8" },
@@ -84,33 +96,21 @@ export default function WelcomePage() {
   return (
     <div className="space-y-24 pb-16">
       {/* Hero */}
-      <section className="relative -mx-4 overflow-hidden px-4 pt-10 pb-4 sm:-mx-6 sm:px-6">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,var(--accent-soft),transparent)]"
-        />
-        <div className="mx-auto max-w-3xl text-center">
-          <Badge tone="highlight" className="mx-auto">
+      <section className="grid grid-cols-1 items-center gap-10 pt-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+        <div>
+          <Badge tone="highlight">
             <Trophy className="h-3 w-3" aria-hidden />
             Free · no subscription · just your data
           </Badge>
-          <h1 className="mt-5 font-display text-4xl leading-[1.05] font-bold tracking-tight text-foreground sm:text-6xl">
-            Every stroke,{" "}
-            <span className="bg-gradient-to-r from-accent to-highlight bg-clip-text text-transparent">
-              tracked
-            </span>
-            . Every PR,{" "}
-            <span className="bg-gradient-to-r from-highlight to-accent bg-clip-text text-transparent">
-              chased
-            </span>
-            .
+          <h1 className="mt-5 font-display text-4xl leading-[1.05] font-bold tracking-tight text-foreground sm:text-5xl">
+            Every stroke, tracked. Every <span className="text-accent">PR</span>, chased.
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
             Row Tracker turns erg pieces into pacing charts, PR history, and team leaderboards. Log a
             piece by hand or import straight from Concept2 Logbook — the trend line does the rest.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button href="/log" size="lg" className="shadow-[var(--shadow-accent-glow)]">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Button href="/log" size="lg">
               <Flame className="h-4 w-4" aria-hidden />
               Log your first piece
             </Button>
@@ -126,6 +126,42 @@ export default function WelcomePage() {
             or jump straight to the dashboard <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </Link>
         </div>
+
+        {/* Proof card — same shape of stat the real dashboard's PR card
+         * shows, seeded with sample splits so the payoff is visible
+         * before you've logged anything. */}
+        <Card className="p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <Badge tone="highlight">
+              <Zap className="h-3 w-3" aria-hidden />
+              PR · 2000m
+            </Badge>
+            <span className="text-xs text-muted">Sample data</span>
+          </div>
+          <p className="tabular mt-4 font-display text-4xl font-bold text-foreground">
+            {formatSplit(HERO_SPLITS[HERO_SPLITS.length - 1])}
+            <span className="ml-1 text-base font-normal text-muted">/500m</span>
+          </p>
+          <p className="mt-1 text-sm font-medium text-negative">
+            {(HERO_SPLITS[0] - HERO_SPLITS[HERO_SPLITS.length - 1]).toFixed(1)}s faster than six weeks ago
+          </p>
+          <div className="mt-5 flex h-24 items-end gap-2">
+            {HERO_SPLITS.map((split, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-t-sm"
+                style={{
+                  height: `${heroBarHeight(split)}%`,
+                  background: i === HERO_SPLITS.length - 1 ? "var(--accent)" : "var(--border-strong)",
+                }}
+              />
+            ))}
+          </div>
+          <div className="mt-1.5 flex justify-between text-[10px] text-muted-soft">
+            <span>Wk 1</span>
+            <span>Wk 6</span>
+          </div>
+        </Card>
       </section>
 
       {/* Workout preview cards */}
@@ -138,7 +174,7 @@ export default function WelcomePage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {WORKOUT_PREVIEWS.map(({ type, icon: Icon, blurb, href }) => (
             <Card key={type} interactive className="group flex flex-col p-5">
-              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-positive text-accent-foreground shadow-[var(--shadow-accent-glow)]">
+              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent-strong">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <h3 className="font-display text-base font-semibold text-foreground">
@@ -240,23 +276,19 @@ export default function WelcomePage() {
 
       {/* Final CTA banner */}
       <section>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent via-[#c73408] to-positive px-6 py-12 text-center shadow-[var(--shadow-accent-glow)] sm:px-12">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_80%_at_50%_100%,rgba(255,255,255,0.18),transparent)]"
-          />
-          <Route className="mx-auto h-8 w-8 text-white/90" aria-hidden />
-          <h2 className="mx-auto mt-3 max-w-lg font-display text-2xl font-bold text-white sm:text-3xl">
+        <div className="rounded-2xl bg-accent px-6 py-12 text-center sm:px-12">
+          <Route className="mx-auto h-8 w-8 text-accent-foreground/80" aria-hidden />
+          <h2 className="mx-auto mt-3 max-w-lg font-display text-2xl font-bold text-accent-foreground sm:text-3xl">
             Ready to find your next PR?
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-white/85">
+          <p className="mx-auto mt-2 max-w-md text-sm text-accent-foreground/80">
             Free, no sign-up wall, no subscription tiers — just log a piece and watch the trend line move.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button
               href="/log"
               size="lg"
-              className="bg-white text-accent-strong shadow-lg hover:bg-white/90"
+              className="!bg-background !text-accent hover:!bg-background/90"
             >
               Log your first workout
             </Button>
@@ -264,7 +296,7 @@ export default function WelcomePage() {
               href="/"
               size="lg"
               variant="secondary"
-              className="border-white/40 bg-transparent text-white hover:border-white hover:bg-white/10"
+              className="!border-accent-foreground/30 !bg-transparent !text-accent-foreground hover:!border-accent-foreground/60 hover:!bg-accent-foreground/10"
             >
               View the dashboard
             </Button>

@@ -22,7 +22,7 @@ export function Nav() {
         <Link href="/" className="flex shrink-0 items-center gap-2 font-display font-semibold tracking-tight">
           <span
             aria-hidden
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-positive text-base text-accent-foreground shadow-[var(--shadow-accent-glow)]"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-base text-accent-foreground"
           >
             🚣
           </span>
