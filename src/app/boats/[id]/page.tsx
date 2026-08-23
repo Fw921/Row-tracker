@@ -26,7 +26,7 @@ export default async function BoatDetailPage({
     prisma.athlete.findMany({
       where: { userId: user.id, archived: false },
       orderBy: { name: "asc" },
-      select: { id: true, name: true },
+      select: { id: true, name: true, side: true },
     }),
   ]);
 
@@ -55,7 +55,11 @@ export default async function BoatDetailPage({
           id: boat.id,
           name: boat.name,
           boatClass: boat.boatClass,
-          seats: boat.seats.map((s) => ({ seatIndex: s.seatIndex, athleteId: s.athleteId })),
+          seats: boat.seats.map((s) => ({
+            seatIndex: s.seatIndex,
+            athleteId: s.athleteId,
+            guestName: s.guestName,
+          })),
         }}
         athletes={athletes}
       />

@@ -52,59 +52,64 @@ export function Reveal({
   );
 }
 
-const staggerContainer: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05 } },
-};
-
 const staggerItem: Variants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: REVEAL_TRANSITION },
 };
 
-/** <ul> that staggers its <RevealListItem> children in as it enters view. */
+// RevealList/RevealTableBody used to own a single `whileInView` trigger
+// (`once: true`) and fan its "visible" state out to children via inherited
+// variants — a plain <ul>/<tbody> wrapper, no motion of its own. That broke
+// the moment a list could grow after its first paint: a roster add, a new
+// boat, a new goal, anything landing via router.refresh() rather than a
+// full reload mounts into a container whose one-time trigger already fired
+// and will never fire again, so the new item inherits nothing and never
+// gets told to animate — stuck at `initial: hidden` (opacity 0) forever,
+// present in the DOM but invisible, until a hard reload remounts
+// everything from scratch. (Found live: adding a second roster athlete
+// left it invisible on screen despite being saved correctly.)
+//
+// The fix is each RevealListItem/RevealRow driving its own `whileInView`
+// instead of depending on a parent orchestration that can only fire once
+// for whatever exists at that moment — so a newly-mounted item always gets
+// its own fresh trigger, whenever it appears. The one-time deliberate
+// staggerChildren cadence between items is the tradeoff: everything already
+// in view now fades in at once rather than cascading, which is a small
+// price for "the row you just added is actually visible."
 export function RevealList({ children, className }: { children: ReactNode; className?: string }) {
+  return <ul className={className}>{children}</ul>;
+}
+
+export function RevealListItem({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.ul
+    <motion.li
       data-reveal
       className={className}
       initial={useInitialState()}
       whileInView="visible"
       viewport={REVEAL_VIEWPORT}
-      variants={staggerContainer}
+      variants={staggerItem}
     >
-      {children}
-    </motion.ul>
-  );
-}
-
-export function RevealListItem({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.li data-reveal className={className} variants={staggerItem}>
       {children}
     </motion.li>
   );
 }
 
-/** <tbody> version of the same stagger, for table rows. */
+/** <tbody> version of the same per-row reveal, for table rows. */
 export function RevealTableBody({ children, className }: { children: ReactNode; className?: string }) {
+  return <tbody className={className}>{children}</tbody>;
+}
+
+export function RevealRow({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.tbody
+    <motion.tr
       data-reveal
       className={className}
       initial={useInitialState()}
       whileInView="visible"
       viewport={REVEAL_VIEWPORT}
-      variants={staggerContainer}
+      variants={staggerItem}
     >
-      {children}
-    </motion.tbody>
-  );
-}
-
-export function RevealRow({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.tr data-reveal className={className} variants={staggerItem}>
       {children}
     </motion.tr>
   );

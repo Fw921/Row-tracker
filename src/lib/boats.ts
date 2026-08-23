@@ -1,4 +1,4 @@
-import type { BoatClass } from "@/generated/prisma/enums";
+import type { BoatClass, RowingSide } from "@/generated/prisma/enums";
 
 type BoatClassInfo = {
   /** Full name for form labels, e.g. "Coxed four (4+)". */
@@ -46,3 +46,14 @@ export function seatLabel(seatIndex: number, seatCount: number): string {
   if (seatIndex === 0) return "Bow";
   return String(seatIndex + 1);
 }
+
+/** Color cue for a rower's rigging side — the same red/green convention as
+ * a boat's port/starboard running lights, deliberately not the app's own
+ * --negative/--positive pace tokens (green="faster split" would collide
+ * with a completely different meaning here). Used in the boat builder, not
+ * the roster page's own plain dropdown. */
+export const SIDE_INFO: Record<RowingSide, { label: string; dotClassName: string }> = {
+  PORT: { label: "Port", dotClassName: "bg-red-500" },
+  STARBOARD: { label: "Starboard", dotClassName: "bg-emerald-500" },
+  EITHER: { label: "Either side", dotClassName: "bg-muted-soft" },
+};

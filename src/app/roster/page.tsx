@@ -11,7 +11,7 @@ export default async function RosterPage() {
   const athletes = await prisma.athlete.findMany({
     where: { userId: user.id, archived: false },
     orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, side: true },
   });
 
   return (

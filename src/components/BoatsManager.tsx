@@ -3,14 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sailboat } from "lucide-react";
+import { Copy, Sailboat } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, Badge, Button, Card, EmptyState, Field, Select, inputClass } from "@/components/ui";
+import { Alert, Badge, Button, Card, EmptyState, Field, IconButton, Select, inputClass } from "@/components/ui";
 import { RevealList, RevealListItem } from "@/components/motion/Reveal";
 import { BOAT_CLASS_INFO, BOAT_CLASSES, COX_SEAT_INDEX } from "@/lib/boats";
 import type { BoatClass } from "@/generated/prisma/enums";
 
-type Seat = { seatIndex: number; athleteId: string | null; athlete: { id: string; name: string } | null };
+type Seat = {
+  seatIndex: number;
+  athleteId: string | null;
+  guestName: string | null;
+  athlete: { id: string; name: string } | null;
+};
 type Boat = { id: string; name: string | null; boatClass: BoatClass; seats: Seat[] };
 
 export function BoatsManager({ boats }: { boats: Boat[] }) {
@@ -18,30 +23,61 @@ export function BoatsManager({ boats }: { boats: Boat[] }) {
   const [name, setName] = useState("");
   const [boatClass, setBoatClass] = useState<BoatClass>("EIGHT_PLUS");
   const [submitting, setSubmitting] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  async function createBoat(input: { name?: string; boatClass: BoatClass; copyFromBoatId?: string }) {
+    const res = await fetch("/api/boats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.error ? JSON.stringify(body.error) : "Couldn't create that boat");
+    }
+    return (await res.json()).boat as Boat;
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/boats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() || undefined, boatClass }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ? JSON.stringify(body.error) : "Couldn't create that boat");
-      }
-      const body = await res.json();
+      const boat = await createBoat({ name: name.trim() || undefined, boatClass });
       toast.success(`${BOAT_CLASS_INFO[boatClass].shortLabel} boat created`);
       setName("");
-      router.push(`/boats/${body.boat.id}`);
+      // refresh() before push(): without it, the /boats list you land back
+      // on later (via the back-link, or a fresh tab) can still show what
+      // the server returned before this boat existed — dynamic pages don't
+      // auto-invalidate a route you've navigated away from.
+      router.refresh();
+      router.push(`/boats/${boat.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  // "Copy previous lineup" — clone an existing boat's class and seat
+  // assignments into a new one, rather than rebuilding a repeat lineup
+  // from scratch.
+  async function handleDuplicate(boat: Boat) {
+    setDuplicatingId(boat.id);
+    try {
+      const copy = await createBoat({
+        name: boat.name ? `${boat.name} (copy)` : undefined,
+        boatClass: boat.boatClass,
+        copyFromBoatId: boat.id,
+      });
+      toast.success("Lineup copied");
+      router.refresh();
+      router.push(`/boats/${copy.id}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't copy that boat");
+    } finally {
+      setDuplicatingId(null);
     }
   }
 
@@ -89,15 +125,23 @@ export function BoatsManager({ boats }: { boats: Boat[] }) {
         <RevealList className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {boats.map((boat) => {
             const info = BOAT_CLASS_INFO[boat.boatClass];
-            const filled = boat.seats.filter((s) => s.athleteId).length;
+            const filled = boat.seats.filter((s) => s.athleteId || s.guestName).length;
             const crew = boat.seats
-              .filter((s) => s.seatIndex !== COX_SEAT_INDEX && s.athlete)
+              .filter((s) => s.seatIndex !== COX_SEAT_INDEX && (s.athlete || s.guestName))
               .sort((a, b) => a.seatIndex - b.seatIndex)
-              .map((s) => s.athlete!.name);
+              .map((s) => s.athlete?.name ?? `*${s.guestName}`);
             return (
               <RevealListItem key={boat.id}>
-                <Card interactive className="h-full p-4">
-                  <Link href={`/boats/${boat.id}`} className="block">
+                <Card interactive className="relative h-full p-4">
+                  <IconButton
+                    label="Duplicate this boat"
+                    className="absolute right-3 top-3"
+                    disabled={duplicatingId === boat.id}
+                    onClick={() => handleDuplicate(boat)}
+                  >
+                    <Copy className="h-3.5 w-3.5" aria-hidden />
+                  </IconButton>
+                  <Link href={`/boats/${boat.id}`} className="block pr-8">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-display text-sm font-semibold tracking-tight text-foreground">
                         {boat.name || info.label}

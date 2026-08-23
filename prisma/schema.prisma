@@ -40,14 +40,25 @@ model Athlete {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name      String
-  archived  Boolean  @default(false) // hide from pickers without losing history
-  createdAt DateTime @default(now())
+  archived  Boolean     @default(false) // hide from pickers without losing history
+  side      RowingSide? // rigging preference, shown as a color cue in the boat builder
+  createdAt DateTime    @default(now())
 
   workouts  Workout[]
   boatSeats BoatSeat[]
 
   @@unique([userId, name])
   @@map("athletes")
+}
+
+/// A rower's rigging-side preference — shown as a color cue (red/green,
+/// the same convention as a boat's port/starboard running lights) in the
+/// boat builder, so a lopsided lineup is obvious at a glance. EITHER
+/// covers a rower who can go either side.
+enum RowingSide {
+  PORT
+  STARBOARD
+  EITHER
 }
 
 /// Which boat class a Boat is — drives how many rowing seats it has and
@@ -82,8 +93,10 @@ model Boat {
 
 /// One seat in a Boat's lineup. `seatIndex` is 0-based bow-to-stroke among
 /// rowing seats; -1 is the sentinel for the coxswain's seat (only present
-/// on boats whose class has one — see BOAT_CLASS_INFO). `athleteId` null
-/// means the seat is still open.
+/// on boats whose class has one — see BOAT_CLASS_INFO). A seat is exactly
+/// one of: open (`athleteId` and `guestName` both null), a roster athlete,
+/// or a guest tile (`guestName` set instead — a visiting rower/recruit with
+/// no roster profile) — enforced in the seats PATCH route, not the schema.
 model BoatSeat {
   id        String   @id @default(cuid())
   boatId    String
@@ -91,6 +104,7 @@ model BoatSeat {
   seatIndex Int
   athleteId String?
   athlete   Athlete? @relation(fields: [athleteId], references: [id], onDelete: SetNull)
+  guestName String?
 
   @@unique([boatId, seatIndex])
   @@map("boat_seats")

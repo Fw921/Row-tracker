@@ -57,6 +57,13 @@ export async function PATCH(
     );
   }
 
+  // A seat is at most one of a roster rower or a guest name — the client
+  // shouldn't send both, but if it does, athleteId wins rather than
+  // silently combining into an inconsistent row.
+  for (const seat of input.seats) {
+    if (seat.athleteId && seat.guestName) seat.guestName = null;
+  }
+
   const assignedAthleteIds = input.seats
     .map((s) => s.athleteId)
     .filter((id): id is string => id !== null);
@@ -84,7 +91,7 @@ export async function PATCH(
     ...input.seats.map((seat) =>
       prisma.boatSeat.update({
         where: { boatId_seatIndex: { boatId: id, seatIndex: seat.seatIndex } },
-        data: { athleteId: seat.athleteId },
+        data: { athleteId: seat.athleteId, guestName: seat.guestName ?? null },
       }),
     ),
   ]);
