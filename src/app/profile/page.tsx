@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Activity, ClipboardList, Target } from "lucide-react";
+import { Activity, CircleUser, ClipboardList, Target } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { Avatar, Card, PageHeader, StatTile } from "@/components/ui";
@@ -23,7 +23,11 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <PageHeader title="Profile" description="Your Row Tracker account." />
+      <PageHeader
+        icon={<CircleUser className="h-4.5 w-4.5" aria-hidden />}
+        title="Profile"
+        description="Your Row Tracker account."
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-6">

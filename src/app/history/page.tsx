@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, Filter, Plus, Upload, X } from "lucide-react";
+import { Activity, Filter, History as HistoryIcon, Plus, Upload, X } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
@@ -51,6 +51,7 @@ export default async function HistoryPage({
   return (
     <div>
       <PageHeader
+        icon={<HistoryIcon className="h-4.5 w-4.5" aria-hidden />}
         title="History"
         description="Everything logged — your own pieces and every team piece."
         action={

@@ -26,6 +26,7 @@ model User {
   athletes      Athlete[]
   pieceGroups   PieceGroup[]
   goals         Goal[]
+  boats         Boat[]
 
   @@map("users")
 }
@@ -42,10 +43,57 @@ model Athlete {
   archived  Boolean  @default(false) // hide from pickers without losing history
   createdAt DateTime @default(now())
 
-  workouts Workout[]
+  workouts  Workout[]
+  boatSeats BoatSeat[]
 
   @@unique([userId, name])
   @@map("athletes")
+}
+
+/// Which boat class a Boat is — drives how many rowing seats it has and
+/// whether it carries a coxswain. See src/lib/boats.ts for the seat
+/// count/labels derived from each value.
+enum BoatClass {
+  EIGHT_PLUS // 8+
+  FOUR_PLUS // 4+
+  FOUR_MINUS // 4-
+  FOUR_X // 4x, quad scull
+  PAIR // 2-
+  DOUBLE // 2x
+  SINGLE // 1x
+}
+
+/// A lineup you're building or have built — a boat class plus a seat chart
+/// of who's rowing where. Nothing here affects logged workouts/results; it's
+/// purely for planning who rows together, iCrew-style.
+model Boat {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String? // optional custom label, e.g. "Varsity 8 - Sat lineup"
+  boatClass BoatClass
+  createdAt DateTime  @default(now())
+
+  seats BoatSeat[]
+
+  @@index([userId])
+  @@map("boats")
+}
+
+/// One seat in a Boat's lineup. `seatIndex` is 0-based bow-to-stroke among
+/// rowing seats; -1 is the sentinel for the coxswain's seat (only present
+/// on boats whose class has one — see BOAT_CLASS_INFO). `athleteId` null
+/// means the seat is still open.
+model BoatSeat {
+  id        String   @id @default(cuid())
+  boatId    String
+  boat      Boat     @relation(fields: [boatId], references: [id], onDelete: Cascade)
+  seatIndex Int
+  athleteId String?
+  athlete   Athlete? @relation(fields: [athleteId], references: [id], onDelete: SetNull)
+
+  @@unique([boatId, seatIndex])
+  @@map("boat_seats")
 }
 
 /// One "everybody rows the same piece" event — the shared parameters a

@@ -96,3 +96,34 @@ export const profileInputSchema = z.object({
 });
 
 export type ProfileInput = z.infer<typeof profileInputSchema>;
+
+// --- Boats (lineup builder) ---------------------------------------------
+
+export const boatClassSchema = z.enum([
+  "EIGHT_PLUS",
+  "FOUR_PLUS",
+  "FOUR_MINUS",
+  "FOUR_X",
+  "PAIR",
+  "DOUBLE",
+  "SINGLE",
+]);
+
+export const boatInputSchema = z.object({
+  name: z.string().trim().max(100).optional(),
+  boatClass: boatClassSchema,
+});
+
+export type BoatInput = z.infer<typeof boatInputSchema>;
+
+export const boatSeatInputSchema = z.object({
+  seatIndex: z.number().int(),
+  athleteId: z.string().min(1).nullable(),
+});
+
+export const boatUpdateSchema = z.object({
+  name: z.string().trim().max(100).optional(),
+  seats: z.array(boatSeatInputSchema),
+});
+
+export type BoatUpdateInput = z.infer<typeof boatUpdateSchema>;

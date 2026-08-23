@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { PageHeader } from "@/components/ui";
@@ -16,6 +17,7 @@ export default async function RosterPage() {
   return (
     <div>
       <PageHeader
+        icon={<ClipboardList className="h-4.5 w-4.5" aria-hidden />}
         title="Roster"
         description="Everyone you might log a piece for. Add the boat once, then pick from this list whenever you enter a team piece."
       />

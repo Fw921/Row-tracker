@@ -32,18 +32,30 @@ export function PageHeader({
   title,
   description,
   action,
+  icon,
 }: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  /** Same icon-in-a-colored-badge recipe as the landing page's feature
+   * cards and StatTile — an easy, low-risk way to carry that page's visual
+   * language into the app itself without touching how data pages read. */
+  icon?: ReactNode;
 }) {
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
-          {title}
-        </h1>
-        {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
+      <div className="flex items-start gap-3">
+        {icon && (
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
+            {icon}
+          </span>
+        )}
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+            {title}
+          </h1>
+          {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
+        </div>
       </div>
       {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
     </div>
@@ -367,12 +379,24 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 /** Skeleton for a PageHeader — title and description bars. */
-export function PageHeaderSkeleton({ withAction }: { withAction?: boolean }) {
+export function PageHeaderSkeleton({
+  withAction,
+  withIcon,
+}: {
+  withAction?: boolean;
+  /** Match the loaded PageHeader's `icon` badge so the skeleton doesn't
+   * shift layout once real content replaces it — pass this on any page
+   * whose PageHeader is given an `icon`. */
+  withIcon?: boolean;
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-48" />
-        <Skeleton className="h-4 w-72 max-w-full" />
+      <div className="flex items-start gap-3">
+        {withIcon && <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />}
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+        </div>
       </div>
       {withAction && <Skeleton className="h-9 w-36 rounded-lg" />}
     </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, ChevronRight, LineChart, Plus, Trophy } from "lucide-react";
+import { Activity, ChevronRight, LayoutDashboard, LineChart, Plus, Trophy } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { DashboardCharts } from "@/components/DashboardCharts";
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
   if (workouts.length === 0 && recentPieceGroups.length === 0) {
     return (
       <div className="max-w-lg">
-        <PageHeader title="Dashboard" />
+        <PageHeader icon={<LayoutDashboard className="h-4.5 w-4.5" aria-hidden />} title="Dashboard" />
         <EmptyState
           icon={<Activity className="h-6 w-6" aria-hidden />}
           title="Nothing logged yet"
@@ -92,6 +92,7 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
+        icon={<LayoutDashboard className="h-4.5 w-4.5" aria-hidden />}
         title="Dashboard"
         action={
           <Button href="/log/team">

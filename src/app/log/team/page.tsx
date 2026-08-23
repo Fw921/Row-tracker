@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { PageHeader } from "@/components/ui";
@@ -16,6 +17,7 @@ export default async function LogTeamPiecePage() {
   return (
     <div>
       <PageHeader
+        icon={<Plus className="h-4.5 w-4.5" aria-hidden />}
         title="Log a team piece"
         description="Set the piece up once — everyone rowed the same distance or the same time — then enter each rower's result, just like calling out splits in the erg room."
       />

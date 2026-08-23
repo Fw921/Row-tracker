@@ -1,3 +1,4 @@
+import { Upload } from "lucide-react";
 import { ImportForm } from "@/components/ImportForm";
 import { PageHeader } from "@/components/ui";
 
@@ -5,6 +6,7 @@ export default function ImportPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
+        icon={<Upload className="h-4.5 w-4.5" aria-hidden />}
         title="Import from Concept2 Logbook"
         description={
           <>

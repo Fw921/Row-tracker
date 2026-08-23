@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus, Sailboat, CircleUser } from "lucide-react";
+import { LayoutDashboard, History, Trophy, ClipboardList, Ship, Upload, Plus, Sailboat, CircleUser } from "lucide-react";
 import { Button, IconButton } from "@/components/ui";
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { href: "/history", label: "History", icon: History },
   { href: "/team", label: "Team", icon: Trophy },
   { href: "/roster", label: "Roster", icon: ClipboardList },
+  { href: "/boats", label: "Boats", icon: Ship },
   { href: "/import", label: "Import", icon: Upload },
 ];
 

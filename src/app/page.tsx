@@ -5,6 +5,7 @@ import {
   Gauge,
   LineChart,
   Sailboat,
+  Ship,
   Target,
   TrendingUp,
   Trophy,
@@ -15,6 +16,7 @@ import {
 import { Card, buttonClassName } from "@/components/ui";
 import { Reveal, RevealList, RevealListItem } from "@/components/motion/Reveal";
 import { WelcomeHero } from "@/components/welcome/WelcomeHero";
+import { ProductPreview } from "@/components/welcome/ProductPreview";
 
 export const metadata: Metadata = {
   title: "Row Tracker — Training data, made fast",
@@ -40,6 +42,11 @@ const FEATURES = [
     icon: Trophy,
     title: "Team overview",
     description: "Coaches get a real-data roster view — no lineups or mock numbers.",
+  },
+  {
+    icon: Ship,
+    title: "Boat builder",
+    description: "Build a lineup by boat class and fill every seat from your roster.",
   },
 ];
 
@@ -79,7 +86,11 @@ export default function WelcomePage() {
         </p>
       </Reveal>
 
-      <RevealList className="mx-auto grid max-w-5xl grid-cols-1 gap-4 pb-20 sm:grid-cols-2 lg:grid-cols-4">
+      <Reveal className="px-4 pb-16 sm:px-6">
+        <ProductPreview />
+      </Reveal>
+
+      <RevealList className="mx-auto grid max-w-4xl grid-cols-1 gap-4 pb-20 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => {
           const Icon = feature.icon;
           return (
@@ -151,8 +162,8 @@ export default function WelcomePage() {
             If you&rsquo;re coaching
           </h3>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">
-            A roster-wide view of team pieces — log the whole boat at once
-            and see every rower&rsquo;s result side by side.
+            A roster-wide view of team pieces, plus a lineup builder — log
+            the whole boat at once and try out who rows where.
           </p>
         </Card>
       </Reveal>
