@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, FileText, Upload, X } from "lucide-react";
+import { Alert, Button, Card } from "@/components/ui";
 
 type ImportSummary = {
   imported: number;
@@ -12,6 +14,8 @@ type ImportSummary = {
 export function ImportForm() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
@@ -21,7 +25,6 @@ export function ImportForm() {
     setError(null);
     setSummary(null);
 
-    const file = inputRef.current?.files?.[0];
     if (!file) {
       setError("Choose a CSV file first.");
       return;
@@ -40,6 +43,7 @@ export function ImportForm() {
       }
 
       setSummary(body);
+      setFile(null);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -48,29 +52,78 @@ export function ImportForm() {
     }
   }
 
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped) setFile(dropped);
+  }
+
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-accent-foreground"
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div
+          {...(!file && {
+            role: "button",
+            tabIndex: 0,
+            onClick: () => inputRef.current?.click(),
+            onKeyDown: (e: React.KeyboardEvent) =>
+              (e.key === "Enter" || e.key === " ") && inputRef.current?.click(),
+          })}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+          className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors ${
+            file ? "" : "cursor-pointer"
+          } ${dragging ? "border-accent bg-accent-soft" : "border-border hover:border-border-strong hover:bg-background"}`}
         >
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          {file ? (
+            <>
+              <FileText className="h-6 w-6 text-accent" aria-hidden />
+              <p className="text-sm font-medium text-foreground">{file.name}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null);
+                  if (inputRef.current) inputRef.current.value = "";
+                }}
+                className="flex cursor-pointer items-center gap-1 text-xs text-muted hover:text-positive"
+              >
+                <X className="h-3 w-3" aria-hidden /> remove
+              </button>
+            </>
+          ) : (
+            <>
+              <Upload className="h-6 w-6 text-muted" aria-hidden />
+              <p className="text-sm font-medium text-foreground">
+                Drag and drop your CSV, or click to browse
+              </p>
+              <p className="text-xs text-muted">Exported from log.concept2.com</p>
+            </>
+          )}
+        </div>
+        <Button type="submit" disabled={submitting || !file}>
+          <Upload className="h-4 w-4" aria-hidden />
           {submitting ? "Importing…" : "Import"}
-        </button>
+        </Button>
       </form>
 
-      {error && <p className="text-sm text-positive">{error}</p>}
+      {error && <Alert>{error}</Alert>}
 
       {summary && (
-        <div className="rounded-md border border-border bg-surface p-4 text-sm">
-          <p className="font-medium">
+        <Card className="p-4 text-sm">
+          <p className="flex items-center gap-1.5 font-medium text-foreground">
+            <CheckCircle2 className="h-4 w-4 text-negative" aria-hidden />
             Imported {summary.imported} workout{summary.imported === 1 ? "" : "s"}.
             {summary.skippedCount > 0 && ` Skipped ${summary.skippedCount}.`}
           </p>
@@ -83,10 +136,10 @@ export function ImportForm() {
               ))}
             </ul>
           )}
-          <a href="/history" className="mt-3 inline-block text-accent underline">
+          <a href="/history" className="mt-3 inline-block text-sm font-medium text-accent hover:text-accent-strong">
             View imported workouts →
           </a>
-        </div>
+        </Card>
       )}
     </div>
   );

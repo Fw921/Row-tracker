@@ -1,49 +1,137 @@
 @import "tailwindcss";
+/* Utility classes only (animate-in/out, fade-*, zoom-*) — used by the Radix
+ * AlertDialog in src/components/ui/alert-dialog.tsx. Defines no colors or
+ * design tokens, so it can't clash with the palette below. */
+@import "tw-animate-css";
 
 :root {
-  --background: #f7f8fa;
+  /* Cool paper background with a hint of green — reads as "boathouse", not
+   * generic SaaS blue-white. */
+  --background: #f3f6f4;
   --surface: #ffffff;
-  --border: #e2e5ea;
-  --foreground: #14181f;
-  --muted: #5b6472;
-  --accent: #0f6e6e;
+  --surface-raised: #ffffff;
+  --border: #e1e7e3;
+  --border-strong: #cdd7d1;
+  --foreground: #0e1a17;
+  --muted: #5b6b65;
+  --muted-soft: #8b978f;
+
+  /* Deep racing-shell teal — richer and slightly more saturated than a flat
+   * "brand blue" so buttons/links read as a considered color, not a default. */
+  --accent: #0a6a5a;
+  --accent-strong: #054e42;
   --accent-foreground: #ffffff;
-  --negative: #1c7a4a;
-  --positive: #b5451b;
+  --accent-soft: #e1f2ec;
+
+  /* Brass/regatta-clock gold, for standout moments (PRs, 1st place). */
+  --highlight: #ad7f1f;
+  --highlight-strong: #7d5c14;
+  --highlight-foreground: #ffffff;
+  --highlight-soft: #f9f0dc;
+
+  /* negative/positive read as "slower/faster", not good/bad, since a positive
+   * split (fading) is the erg-room-bad one and a negative split is good. */
+  --negative: #157a4f;
+  --positive: #bf4a1e;
+  /* Text-on-tint variant (e.g. Alert body, "slower" badge text) — #bf4a1e at
+   * 10% over surface only measures 4.34:1, short of the 4.5:1 AA floor for
+   * body text. This darkened value clears 5.4:1+ on that tint. */
+  --positive-strong: #a5401a;
+
+  /* Supporting hues for multi-series charts, chosen to sit alongside accent
+   * and highlight without fighting them. */
+  --chart-1: var(--accent);
+  --chart-2: var(--highlight);
+  --chart-3: #5b57b8;
+  --chart-4: #b5451b;
+  --chart-5: #3d7ea6;
+
+  --shadow-card: 0 1px 2px rgba(14, 26, 23, 0.05), 0 1px 1px rgba(14, 26, 23, 0.03);
+  --shadow-raised: 0 8px 24px -8px rgba(14, 26, 23, 0.16), 0 2px 6px -2px rgba(14, 26, 23, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-foreground: var(--accent-foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent-soft: var(--accent-soft);
+  --color-highlight: var(--highlight);
+  --color-highlight-strong: var(--highlight-strong);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-negative: var(--negative);
+  --color-positive: var(--positive);
+  --color-positive-strong: var(--positive-strong);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0e12;
-    --surface: #12161c;
-    --border: #232932;
-    --foreground: #eef1f5;
-    --muted: #90989f;
-    --accent: #35b8ab;
+    --background: #0a100e;
+    --surface: #101815;
+    --surface-raised: #141e1a;
+    --border: #223029;
+    --border-strong: #2d3f36;
+    --foreground: #eef3f0;
+    --muted: #8fa199;
+    --muted-soft: #647169;
+
+    --accent: #33bda6;
+    --accent-strong: #5fd0bc;
     --accent-foreground: #04211f;
+    --accent-soft: #123330;
+
+    --highlight: #d9a942;
+    --highlight-strong: #eabf63;
+    --highlight-foreground: #241a02;
+    --highlight-soft: #2a2210;
+
     --negative: #4fd48a;
     --positive: #ff9466;
+    /* Dark surfaces already give #ff9466 7:1+ on its own tint — no darkening
+     * needed here, unlike the light-mode value above. */
+    --positive-strong: #ff9466;
+
+    --chart-1: var(--accent);
+    --chart-2: var(--highlight);
+    --chart-3: #948dee;
+    --chart-4: #ff8f66;
+    --chart-5: #6fb6e0;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+    --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }

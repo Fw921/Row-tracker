@@ -23,8 +23,52 @@ model User {
 
   workouts      Workout[]
   importBatches ImportBatch[]
+  athletes      Athlete[]
+  pieceGroups   PieceGroup[]
 
   @@map("users")
+}
+
+/// A teammate on the account owner's roster — a coxswain/coach logs pieces
+/// for these people. Not a login: just a name to attribute results to, so
+/// the whole boat's erg piece can be entered in one batch.
+model Athlete {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String
+  archived  Boolean  @default(false) // hide from pickers without losing history
+  createdAt DateTime @default(now())
+
+  workouts Workout[]
+
+  @@unique([userId, name])
+  @@map("athletes")
+}
+
+/// One "everybody rows the same piece" event — the shared parameters a
+/// coxswain sets once (date, distance/time, title) before entering each
+/// rower's individual result. Lets the erg-room leaderboard be an exact
+/// query instead of guessing which workouts belong together.
+model PieceGroup {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date  DateTime
+  type  WorkoutType
+  title String?
+
+  targetDistanceMeters Float? // set for fixed-distance pieces (e.g. 2k)
+  targetTimeSeconds    Float? // set for fixed-time pieces (e.g. 20')
+
+  createdAt DateTime @default(now())
+
+  workouts Workout[]
+
+  @@index([userId, date])
+  @@map("piece_groups")
 }
 
 /// How a workout's data got into the system.
@@ -59,16 +103,24 @@ model Workout {
   totalTimeSeconds    Float // sum across all work intervals, elapsed erg time
   avgSplitSeconds500m Float // derived: totalTimeSeconds / totalDistanceMeters * 500
 
-  avgWatts       Float?
-  avgHeartRate   Int?
-  maxHeartRate   Int?
-  avgStrokeRate  Float?
-  dragFactor     Int?
-  calories       Float?
+  avgWatts      Float?
+  avgHeartRate  Int?
+  maxHeartRate  Int?
+  avgStrokeRate Float?
+  dragFactor    Int?
+  calories      Float?
 
-  source        DataSource @default(MANUAL)
+  source        DataSource   @default(MANUAL)
   importBatchId String?
   importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+
+  // Null athleteId = the account owner's own piece (the original single-user
+  // flow). Set = logged on behalf of a roster teammate, usually as part of
+  // a PieceGroup entered in one batch.
+  athleteId    String?
+  athlete      Athlete?    @relation(fields: [athleteId], references: [id], onDelete: SetNull)
+  pieceGroupId String?
+  pieceGroup   PieceGroup? @relation(fields: [pieceGroupId], references: [id], onDelete: SetNull)
 
   notes String?
 
@@ -79,6 +131,8 @@ model Workout {
 
   @@index([userId, date])
   @@index([userId, type])
+  @@index([athleteId, date])
+  @@index([pieceGroupId])
   @@map("workouts")
 }
 
@@ -90,9 +144,9 @@ model Split {
   workoutId String
   workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
-  index           Int // 1-based order within the workout
-  distanceMeters  Float
-  timeSeconds     Float
+  index            Int // 1-based order within the workout
+  distanceMeters   Float
+  timeSeconds      Float
   splitSeconds500m Float // derived: timeSeconds / distanceMeters * 500
 
   restTimeSeconds    Float?
@@ -109,14 +163,14 @@ model Split {
 /// One CSV upload event, so imported workouts can be traced back to the
 /// file they came from (and re-import can be made idempotent later).
 model ImportBatch {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   source     DataSource
   filename   String
   rowCount   Int
-  importedAt DateTime @default(now())
+  importedAt DateTime   @default(now())
 
   workouts Workout[]
 

@@ -1,0 +1,401 @@
+import clsx from "clsx";
+import Link from "next/link";
+import { AlertCircle, ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
+
+export function Card({
+  className,
+  children,
+  interactive,
+}: {
+  className?: string;
+  children: ReactNode;
+  interactive?: boolean;
+}) {
+  return (
+    <div
+      className={clsx(
+        "rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]",
+        interactive && "transition-shadow hover:shadow-[var(--shadow-raised)]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        {eyebrow && (
+          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            {eyebrow}
+          </div>
+        )}
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+          {title}
+        </h1>
+        {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
+      </div>
+      {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
+    </div>
+  );
+}
+
+const buttonBase =
+  "inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface";
+const buttonSizes = { sm: "px-2.5 py-1.5 text-xs", md: "px-4 py-2", lg: "px-5 py-2.5 text-base" };
+const buttonVariants = {
+  primary: "bg-accent text-accent-foreground shadow-sm hover:bg-accent-strong",
+  secondary: "border border-border bg-surface text-foreground hover:border-border-strong hover:bg-background",
+  ghost: "text-muted hover:text-foreground hover:bg-background",
+  danger: "text-positive hover:bg-positive/10",
+  // Filled, for the affirmative action of a destructive confirm dialog —
+  // "danger" alone reads as too light-weight next to a bordered Cancel.
+  dangerSolid: "bg-positive text-white shadow-sm hover:bg-positive-strong",
+};
+
+/** The class string a Button of this variant/size renders — exported so
+ * non-Button elements (e.g. Radix's asChild-composed AlertDialogAction)
+ * can look identical without a second button styling system. */
+export function buttonClassName({
+  variant = "primary",
+  size = "md",
+  className,
+}: {
+  variant?: keyof typeof buttonVariants;
+  size?: keyof typeof buttonSizes;
+  className?: string;
+} = {}) {
+  return clsx(buttonBase, buttonSizes[size], buttonVariants[variant], className);
+}
+
+type ButtonProps = {
+  variant?: keyof typeof buttonVariants;
+  size?: keyof typeof buttonSizes;
+  className?: string;
+  children: ReactNode;
+} & (
+  | ({ href: string } & Omit<React.ComponentProps<typeof Link>, "href" | "className">)
+  | ({ href?: undefined } & React.ButtonHTMLAttributes<HTMLButtonElement>)
+);
+
+export function Button({
+  variant = "primary",
+  size = "md",
+  className,
+  children,
+  ...props
+}: ButtonProps) {
+  const cls = buttonClassName({ variant, size, className });
+  if ("href" in props && props.href !== undefined) {
+    const { href, ...rest } = props as { href: string };
+    return (
+      <Link href={href} className={cls} {...rest}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <button className={cls} {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
+      {children}
+    </button>
+  );
+}
+
+/** Small square button for a single icon action (remove, delete, …). */
+export function IconButton({
+  className,
+  children,
+  label,
+  tone = "muted",
+  ...props
+}: {
+  className?: string;
+  children: ReactNode;
+  label: string;
+  tone?: "muted" | "danger";
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      aria-label={label}
+      title={label}
+      className={clsx(
+        "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function Badge({
+  children,
+  tone = "neutral",
+  className,
+}: {
+  children: ReactNode;
+  tone?: "neutral" | "accent" | "highlight" | "faster" | "slower";
+  className?: string;
+}) {
+  const tones = {
+    neutral: "border-border text-muted",
+    accent: "border-accent/25 bg-accent-soft text-accent-strong",
+    highlight: "border-highlight/30 bg-highlight-soft text-highlight-strong",
+    // Named for erg pacing, not good/bad: negative split = faster finish.
+    faster: "border-negative/30 bg-negative/10 text-negative",
+    // text-positive-strong, not text-positive: positive on its own 10% tint
+    // only measures 4.34:1, short of the 4.5:1 AA floor for body text.
+    slower: "border-positive/30 bg-positive/10 text-positive-strong",
+  };
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+        tones[tone],
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon?: ReactNode;
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
+      {icon && (
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-2xl">
+          {icon}
+        </div>
+      )}
+      <p className="font-display font-medium text-foreground">{title}</p>
+      {description && <p className="mt-1 max-w-sm text-sm leading-relaxed text-muted">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}
+
+/** Inline error/warning banner for form-level validation feedback. */
+export function Alert({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      role="alert"
+      className={clsx(
+        "flex items-start gap-2 rounded-lg border border-positive/25 bg-positive/10 px-3 py-2.5 text-sm text-positive-strong",
+        className,
+      )}
+    >
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+      <span>{children}</span>
+    </div>
+  );
+}
+
+/** A KPI-style tile: icon, label, and a big display-face number. */
+export function StatTile({
+  icon,
+  label,
+  value,
+  tone = "default",
+}: {
+  icon?: ReactNode;
+  label: string;
+  value: string;
+  tone?: "default" | "highlight";
+}) {
+  return (
+    <Card className="p-3.5 sm:p-4">
+      <div className="mb-1.5 flex items-center gap-1.5 text-muted">
+        {icon && (
+          <span
+            className={clsx(
+              "flex h-6 w-6 items-center justify-center rounded-md",
+              tone === "highlight" ? "bg-highlight-soft text-highlight-strong" : "bg-accent-soft text-accent-strong",
+            )}
+          >
+            {icon}
+          </span>
+        )}
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
+    </Card>
+  );
+}
+
+/** Shared text/number/date/select input styling used across every form. */
+export const inputClass =
+  "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-soft focus:border-accent focus:ring-2 focus:ring-accent/15";
+
+/** A native <select> with a custom chevron so it matches the text/date
+ * inputs visually — still a real <select> underneath for accessibility and
+ * mobile-native pickers, just with the browser's own arrow hidden. */
+export function Select({
+  className,
+  children,
+  ...props
+}: { className?: string } & React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select
+        className={clsx(inputClass, "appearance-none pr-8", className)}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+export function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="font-medium text-foreground">{label}</span>
+        {/* text-muted, not text-muted-soft: muted-soft only clears 3:1 on
+         * surface, short of the 4.5:1 AA floor for this size of body text. */}
+        {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+/** Small rounded chip button, e.g. distance presets. */
+export function Chip({
+  active,
+  className,
+  ...props
+}: { active?: boolean; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      className={clsx(
+        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        active
+          ? "border-accent bg-accent-soft text-accent-strong"
+          : "border-border text-muted hover:border-border-strong hover:bg-background",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** Pulsing placeholder block for loading.tsx skeletons. Pass a Tailwind
+ * height/width via className, e.g. <Skeleton className="h-4 w-24" />. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={clsx("animate-pulse rounded-md bg-border/70", className)} aria-hidden />;
+}
+
+/** Skeleton for a PageHeader — title, eyebrow, and description bars. */
+export function PageHeaderSkeleton({ withAction }: { withAction?: boolean }) {
+  return (
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      {withAction && <Skeleton className="h-9 w-36 rounded-lg" />}
+    </div>
+  );
+}
+
+/** Skeleton for a row of StatTile-shaped cards. */
+export function StatGridSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      {Array.from({ length: count }, (_, i) => (
+        <Card key={i} className="p-3.5 sm:p-4">
+          <Skeleton className="mb-2 h-5 w-5 rounded-md" />
+          <Skeleton className="h-6 w-16" />
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/** Skeleton for a Card full of rows, e.g. a table or list about to load. */
+export function CardListSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <Card className="divide-y divide-border overflow-hidden">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex items-center gap-3 px-4 py-3">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 flex-1 max-w-xs" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </Card>
+  );
+}
+
+/** Deterministic color for an avatar-style initial badge, keyed off a name
+ * so the same person always gets the same color across the app. */
+const AVATAR_HUES = [210, 160, 20, 280, 340, 40, 190];
+export function initialsAvatarStyle(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  const hue = AVATAR_HUES[hash % AVATAR_HUES.length];
+  return { backgroundColor: `hsl(${hue} 70% 94%)`, color: `hsl(${hue} 55% 32%)` };
+}
+
+export function Avatar({ name, className }: { name: string; className?: string }) {
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+  return (
+    <span
+      className={clsx(
+        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+        className,
+      )}
+      style={initialsAvatarStyle(name)}
+    >
+      {initials || "?"}
+    </span>
+  );
+}

@@ -66,6 +66,21 @@ export function speedMetersPerSecond(distanceMeters: number, timeSeconds: number
 }
 
 /**
+ * Resolve one rower's total distance/time for a team piece, given which
+ * side of the piece was shared (the "mode") and their individual result
+ * for the varying side.
+ */
+export function resolveTeamEntryTotals(
+  mode: "distance" | "time",
+  target: number,
+  value: number,
+): { totalDistanceMeters: number; totalTimeSeconds: number } {
+  return mode === "distance"
+    ? { totalDistanceMeters: target, totalTimeSeconds: value }
+    : { totalDistanceMeters: value, totalTimeSeconds: target };
+}
+
+/**
  * Classify pacing strategy for a piece from its ordered splits, comparing
  * the average of the first half of splits to the second half.
  * Threshold is in seconds/500m; differences smaller than it count as even.

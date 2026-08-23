@@ -3,6 +3,7 @@ import {
   classifyPacing,
   formatDuration,
   parseDuration,
+  resolveTeamEntryTotals,
   splitPer500m,
 } from "@/lib/pace";
 
@@ -55,6 +56,22 @@ describe("splitPer500m", () => {
   it("returns 0 for zero/negative distance", () => {
     expect(splitPer500m(0, 100)).toBe(0);
     expect(splitPer500m(-5, 100)).toBe(0);
+  });
+});
+
+describe("resolveTeamEntryTotals", () => {
+  it("uses the target as distance and the entry as time in distance mode", () => {
+    expect(resolveTeamEntryTotals("distance", 2000, 420)).toEqual({
+      totalDistanceMeters: 2000,
+      totalTimeSeconds: 420,
+    });
+  });
+
+  it("uses the target as time and the entry as distance in time mode", () => {
+    expect(resolveTeamEntryTotals("time", 1200, 5200)).toEqual({
+      totalDistanceMeters: 5200,
+      totalTimeSeconds: 1200,
+    });
   });
 });
 
