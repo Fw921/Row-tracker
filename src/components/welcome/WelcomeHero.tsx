@@ -27,11 +27,20 @@ const ShaderGradientBackground = dynamic(
   },
 );
 
-/** Public, pre-login landing hero for "/". Nav.tsx hides itself on this
- * route (see NAV_HIDDEN_ROUTES) since there's no session to show nav for. */
+/**
+ * Public, pre-login landing hero for "/". Nav.tsx hides itself on this
+ * route (see NAV_HIDDEN_ROUTES) since there's no session to show nav for.
+ *
+ * `w-screen` + `left-1/2` + `-translate-x-1/2` breaks out of the root
+ * layout's centered `max-w-6xl` container (see AuthLayout.tsx for why a
+ * same-magnitude negative margin alone doesn't reach a true full-bleed
+ * edge) so the gradient fills the viewport, not just the content column.
+ * `min-h-screen` (not a nav-height-subtracted calc) because Nav is hidden
+ * here — there's no header height to account for.
+ */
 export function WelcomeHero() {
   return (
-    <div className="relative -mx-4 -mt-6 flex min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden sm:-mx-6 sm:-mt-8">
+    <div className="relative left-1/2 -mt-6 flex min-h-screen w-screen -translate-x-1/2 flex-col overflow-hidden sm:-mt-8">
       <div className="absolute inset-0" aria-hidden>
         <ShaderGradientBackground />
       </div>
