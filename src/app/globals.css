@@ -137,3 +137,39 @@ body {
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
+
+/* Ambient background — see src/components/graphics.tsx#WaterField. Each
+ * .water-track is a 200%-wide strip containing the same wave path twice;
+ * translating it exactly one strip-width (-50%) loops seamlessly however
+ * long the animation runs. */
+.water-track {
+  width: 200%;
+  animation-name: wave-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.water-track-reverse {
+  animation-direction: reverse;
+}
+@keyframes wave-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .water-track {
+    animation: none;
+  }
+}
+
+/* Fine grain texture layered over the water field so the dark background
+ * reads as textured, not a flat fill — same technique paper/film grain
+ * overlays use, generated with an SVG turbulence filter (no image asset). */
+.grain-layer {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

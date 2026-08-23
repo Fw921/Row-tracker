@@ -1,57 +1,45 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BarChart3,
-  ClipboardList,
-  Flame,
-  Gauge,
-  Medal,
-  Route,
-  Timer,
-  Trophy,
-  Upload,
-  Users,
-  Zap,
-} from "lucide-react";
-import { Badge, Button, Card, initialsAvatarStyle } from "@/components/ui";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { Button, Card } from "@/components/ui";
 import { LandingDemoChart } from "@/components/LandingDemoChart";
+import { StrokeMark, WakeRule } from "@/components/graphics";
 import { WORKOUT_TYPE_LABELS } from "@/lib/constants";
 import { formatSplit } from "@/lib/pace";
 
 export const metadata: Metadata = {
   title: "Row Tracker — Every stroke, tracked",
   description:
-    "An energetic tour of Row Tracker: log erg pieces, watch your splits drop, and race your whole boat on one leaderboard.",
+    "Log erg pieces, watch your splits drop, and race your whole boat on one leaderboard.",
 };
 
-const WORKOUT_PREVIEWS: {
+const WORKOUT_ENTRIES: {
+  index: string;
   type: keyof typeof WORKOUT_TYPE_LABELS;
-  icon: typeof Zap;
   blurb: string;
   href: string;
 }[] = [
   {
+    index: "01",
     type: "SINGLE_DISTANCE",
-    icon: Flame,
     blurb: "A 2k, a 5k, a 10k test — set the distance, log the damage.",
     href: "/log",
   },
   {
+    index: "02",
     type: "STEADY_STATE",
-    icon: Gauge,
     blurb: "30 steady minutes at a rate cap. Base-building, tracked.",
     href: "/log",
   },
   {
+    index: "03",
     type: "INTERVALS",
-    icon: Zap,
-    blurb: "6x500m, 4x1000m — whatever the set, splits stack up per rep.",
+    blurb: "6×500m, 4×1000m — whatever the set, splits stack up per rep.",
     href: "/log",
   },
   {
+    index: "04",
     type: "SINGLE_TIME",
-    icon: Timer,
     blurb: "Everybody rows the same 20 minutes — see who covered more meters.",
     href: "/log/team",
   },
@@ -68,25 +56,27 @@ function heroBarHeight(splitSeconds: number) {
   return 28 + ((HERO_MAX - splitSeconds) / range) * 72;
 }
 
-const CREW = [
-  { name: "Jordan Ade", seat: "Stroke", split: "1:52.3" },
-  { name: "Sam Ruiz", seat: "3 Seat", split: "1:55.8" },
-  { name: "Priya Nair", seat: "Bow", split: "1:58.1" },
+/** Sample roster, styled like a regatta heat sheet — lane, name, seat,
+ * result — rather than another row of icon cards. */
+const HEAT_SHEET = [
+  { lane: 1, name: "Jordan Ade", seat: "Stroke", split: 112.3, place: 1 },
+  { lane: 2, name: "Sam Ruiz", seat: "3 Seat", split: 115.8, place: 2 },
+  { lane: 3, name: "Priya Nair", seat: "Bow", split: 118.1, place: 3 },
 ];
 
-const FEATURE_GRID = [
+const BOATHOUSE_ENTRIES = [
   {
-    icon: Upload,
+    index: "01",
     title: "Import from Concept2",
     body: "Upload a season CSV from log.concept2.com and every row becomes a workout — no manual re-typing.",
   },
   {
-    icon: ClipboardList,
+    index: "02",
     title: "Filterable history",
     body: "Every piece you or your teammates have logged, sortable by date, type, or distance, with one-click delete.",
   },
   {
-    icon: BarChart3,
+    index: "03",
     title: "Real dashboard analytics",
     body: "Split trend, heart-rate trend, pacing-strategy overlays, weekly volume, and a PR card per distance.",
   },
@@ -94,28 +84,25 @@ const FEATURE_GRID = [
 
 export default function WelcomePage() {
   return (
-    <div className="space-y-24 pb-16">
+    <div className="pb-16">
       {/* Hero */}
-      <section className="grid grid-cols-1 items-center gap-10 pt-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+      <section className="grid grid-cols-1 items-center gap-8 pt-4 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4">
         <div>
-          <Badge tone="highlight">
-            <Trophy className="h-3 w-3" aria-hidden />
-            Free · no subscription · just your data
-          </Badge>
-          <h1 className="mt-5 font-display text-4xl leading-[1.05] font-bold tracking-tight text-foreground sm:text-5xl">
-            Every stroke, tracked. Every <span className="text-accent">PR</span>, chased.
+          <h1 className="font-display text-4xl leading-[1.05] font-bold tracking-tight text-foreground sm:text-6xl">
+            Every stroke,
+            <br />
+            tracked. Every <span className="text-accent">PR</span>, chased.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
             Row Tracker turns erg pieces into pacing charts, PR history, and team leaderboards. Log a
             piece by hand or import straight from Concept2 Logbook — the trend line does the rest.
+            Free, no subscription, no sign-up wall.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button href="/log" size="lg">
-              <Flame className="h-4 w-4" aria-hidden />
               Log your first piece
             </Button>
             <Button href="/import" variant="secondary" size="lg">
-              <Upload className="h-4 w-4" aria-hidden />
               Import from Concept2
             </Button>
           </div>
@@ -127,25 +114,45 @@ export default function WelcomePage() {
           </Link>
         </div>
 
-        {/* Proof card — same shape of stat the real dashboard's PR card
-         * shows, seeded with sample splits so the payoff is visible
-         * before you've logged anything. */}
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center justify-between">
-            <Badge tone="highlight">
-              <Zap className="h-3 w-3" aria-hidden />
-              PR · 2000m
-            </Badge>
-            <span className="text-xs text-muted">Sample data</span>
+        <div className="relative mx-auto aspect-square w-full max-w-sm">
+          <StrokeMark className="h-full w-full" />
+        </div>
+      </section>
+
+      <WakeRule className="my-16 h-6 w-full text-border" />
+
+      {/* Progress tracking demo + PR proof, side by side instead of a
+       * third row of icon cards */}
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_0.65fr]">
+        <div>
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Watch your splits drop
+          </h2>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+            This is the same chart component your real dashboard renders, seeded here with sample
+            numbers so the payoff is visible before you&apos;ve logged a single piece.
+          </p>
+          <div className="mt-5">
+            <LandingDemoChart />
           </div>
-          <p className="tabular mt-4 font-display text-4xl font-bold text-foreground">
-            {formatSplit(HERO_SPLITS[HERO_SPLITS.length - 1])}
-            <span className="ml-1 text-base font-normal text-muted">/500m</span>
-          </p>
-          <p className="mt-1 text-sm font-medium text-negative">
-            {(HERO_SPLITS[0] - HERO_SPLITS[HERO_SPLITS.length - 1]).toFixed(1)}s faster than six weeks ago
-          </p>
-          <div className="mt-5 flex h-24 items-end gap-2">
+        </div>
+
+        <Card className="flex flex-col justify-between p-5 sm:p-6">
+          <div>
+            <div className="flex items-center justify-between text-xs text-muted">
+              <span className="font-medium text-foreground">PR · 2000m</span>
+              <span>Sample data</span>
+            </div>
+            <p className="tabular mt-4 font-display text-4xl font-bold text-foreground">
+              {formatSplit(HERO_SPLITS[HERO_SPLITS.length - 1])}
+              <span className="ml-1 text-base font-normal text-muted">/500m</span>
+            </p>
+            <p className="mt-1 text-sm font-medium text-negative">
+              {(HERO_SPLITS[0] - HERO_SPLITS[HERO_SPLITS.length - 1]).toFixed(1)}s faster than six weeks
+              ago
+            </p>
+          </div>
+          <div className="mt-6 flex h-24 items-end gap-2">
             {HERO_SPLITS.map((split, i) => (
               <div
                 key={i}
@@ -164,121 +171,113 @@ export default function WelcomePage() {
         </Card>
       </section>
 
-      {/* Workout preview cards */}
+      <WakeRule className="my-16 h-6 w-full text-border" />
+
+      {/* Workout types — an indexed list, not a repeated icon-card grid */}
       <section>
-        <SectionHeader
-          eyebrow="Log anything"
-          title="Every piece has a home"
-          description="Pick the shape of the workout — Row Tracker handles the math (splits, pace, avg 500m) either way."
-        />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {WORKOUT_PREVIEWS.map(({ type, icon: Icon, blurb, href }) => (
-            <Card key={type} interactive className="group flex flex-col p-5">
-              <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent-strong">
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <h3 className="font-display text-base font-semibold text-foreground">
-                {WORKOUT_TYPE_LABELS[type]}
-              </h3>
-              <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted">{blurb}</p>
+        <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Every piece has a home
+        </h2>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+          Pick the shape of the workout — Row Tracker handles the math either way.
+        </p>
+        <ul className="mt-8 divide-y divide-border border-t border-border">
+          {WORKOUT_ENTRIES.map(({ index, type, blurb, href }) => (
+            <li key={type}>
               <Link
                 href={href}
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent transition-colors group-hover:text-accent-strong"
+                className="group grid grid-cols-[3rem_1fr_auto] items-baseline gap-4 py-5 sm:grid-cols-[4rem_14rem_1fr_auto]"
               >
-                Log it <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                <span className="tabular font-display text-xl text-muted-soft">{index}</span>
+                <span className="font-display text-lg font-semibold text-foreground">
+                  {WORKOUT_TYPE_LABELS[type]}
+                </span>
+                <span className="col-span-2 text-sm leading-relaxed text-muted sm:col-span-1">
+                  {blurb}
+                </span>
+                <ArrowUpRight
+                  className="hidden h-5 w-5 shrink-0 text-muted transition-colors group-hover:text-accent sm:block"
+                  aria-hidden
+                />
               </Link>
-            </Card>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* Progress tracking demo */}
-      <section>
-        <SectionHeader
-          eyebrow="Progress tracking"
-          title="Watch your splits drop"
-          description="This is a live chart component — same one your real dashboard renders — seeded with sample numbers so you can see the payoff before you log a single piece."
-        />
-        <LandingDemoChart />
-      </section>
+      <WakeRule className="my-16 h-6 w-full text-border" />
 
-      {/* Crew / roster ("trainer profiles" equivalent) */}
-      <section>
-        <SectionHeader
-          eyebrow="Built for a boat, not just a solo athlete"
-          title="Log for the whole crew at once"
-          description="Add teammates to your roster, then log one piece for everybody — set the shared distance or time, enter each rower's result, and get a fastest-to-slowest leaderboard automatically."
-        />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {CREW.map((athlete, i) => (
-              <Card key={athlete.name} className="p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold"
-                    style={initialsAvatarStyle(athlete.name)}
-                  >
-                    {athlete.name
-                      .split(" ")
-                      .map((p) => p[0])
-                      .join("")}
-                  </span>
-                  {i === 0 && (
-                    <Badge tone="highlight">
-                      <Medal className="h-3 w-3" aria-hidden />
-                      1st
-                    </Badge>
-                  )}
-                </div>
-                <p className="font-display text-sm font-semibold text-foreground">{athlete.name}</p>
-                <p className="text-xs text-muted">{athlete.seat}</p>
-                <p className="tabular mt-2 font-display text-lg font-semibold text-foreground">
-                  {athlete.split}
-                  <span className="ml-1 text-xs font-normal text-muted">/500m</span>
-                </p>
-              </Card>
-            ))}
+      {/* Crew / roster, as a heat sheet rather than a row of stat cards */}
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_0.8fr]">
+        <div>
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Log for the whole crew at once
+          </h2>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+            Add teammates to your roster, then log one piece for everybody — set the shared distance or
+            time, enter each rower&apos;s result, and get a leaderboard automatically. No logins for
+            teammates required, just names on a roster.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button href="/roster" variant="secondary" size="sm">
+              Set up your roster
+            </Button>
+            <Button href="/log/team" size="sm">
+              Log a team piece
+            </Button>
           </div>
-          <Card className="flex flex-col justify-center gap-4 p-6">
-            <div className="flex items-center gap-2 text-accent">
-              <Users className="h-5 w-5" aria-hidden />
-              <span className="font-display text-sm font-semibold">Roster &amp; team pieces</span>
-            </div>
-            <p className="text-sm leading-relaxed text-muted">
-              No logins for teammates required — just names on a roster. Call out results like you would
-              in the erg room, and everyone&apos;s piece lands on the leaderboard for that event.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button href="/roster" variant="secondary" size="sm">
-                Set up your roster
-              </Button>
-              <Button href="/log/team" size="sm">
-                Log a team piece
-              </Button>
-            </div>
-          </Card>
+        </div>
+
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted">
+                <th className="w-10 px-3 py-2 font-medium">Lane</th>
+                <th className="px-3 py-2 font-medium">Rower</th>
+                <th className="px-3 py-2 font-medium">Seat</th>
+                <th className="px-3 py-2 text-right font-medium">Split /500m</th>
+              </tr>
+            </thead>
+            <tbody className="tabular divide-y divide-border">
+              {HEAT_SHEET.map((row) => (
+                <tr key={row.lane} className={row.place === 1 ? "bg-highlight-soft" : undefined}>
+                  <td className="px-3 py-2.5 text-muted-soft">{row.lane}</td>
+                  <td className="px-3 py-2.5 font-medium text-foreground">{row.name}</td>
+                  <td className="px-3 py-2.5 text-muted">{row.seat}</td>
+                  <td className="px-3 py-2.5 text-right font-semibold text-foreground">
+                    {formatSplit(row.split)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* Feature grid */}
+      <WakeRule className="my-16 h-6 w-full text-border" />
+
+      {/* Everything else — same indexed-list pattern as the workout types,
+       * kept deliberately consistent rather than inventing a third card
+       * treatment */}
       <section>
-        <SectionHeader eyebrow="Everything else" title="The rest of the boathouse" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {FEATURE_GRID.map(({ icon: Icon, title, body }) => (
-            <Card key={title} className="p-5">
-              <Icon className="h-5 w-5 text-highlight" aria-hidden />
-              <h3 className="mt-3 font-display text-sm font-semibold text-foreground">{title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">{body}</p>
-            </Card>
+        <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          The rest of the boathouse
+        </h2>
+        <ul className="mt-8 divide-y divide-border border-t border-border">
+          {BOATHOUSE_ENTRIES.map(({ index, title, body }) => (
+            <li key={title} className="grid grid-cols-[3rem_1fr] gap-4 py-5 sm:grid-cols-[4rem_14rem_1fr]">
+              <span className="tabular font-display text-xl text-muted-soft">{index}</span>
+              <span className="font-display text-lg font-semibold text-foreground">{title}</span>
+              <span className="col-span-2 text-sm leading-relaxed text-muted sm:col-span-1">{body}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* Final CTA banner */}
-      <section>
+      {/* Final CTA — flat, confident, full-bleed */}
+      <section className="mt-20">
         <div className="rounded-2xl bg-accent px-6 py-12 text-center sm:px-12">
-          <Route className="mx-auto h-8 w-8 text-accent-foreground/80" aria-hidden />
-          <h2 className="mx-auto mt-3 max-w-lg font-display text-2xl font-bold text-accent-foreground sm:text-3xl">
+          <h2 className="mx-auto max-w-lg font-display text-2xl font-bold text-accent-foreground sm:text-3xl">
             Ready to find your next PR?
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-accent-foreground/80">
@@ -303,31 +302,6 @@ export default function WelcomePage() {
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function SectionHeader({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-}) {
-  return (
-    <div className="mb-6 max-w-2xl">
-      {eyebrow && (
-        <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-          {eyebrow}
-        </div>
-      )}
-      <h2 className="font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-        {title}
-      </h2>
-      {description && <p className="mt-1.5 text-sm leading-relaxed text-muted">{description}</p>}
     </div>
   );
 }
