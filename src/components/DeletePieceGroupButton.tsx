@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -15,6 +16,7 @@ export function DeletePieceGroupButton({ id }: { id: string }) {
     setPending(true);
     try {
       await fetch(`/api/piece-groups/${id}`, { method: "DELETE" });
+      toast.success("Team piece deleted");
       router.push("/team");
       router.refresh();
     } finally {

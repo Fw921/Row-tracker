@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, UserPlus } from "lucide-react";
+import { toast } from "sonner";
 import { Alert, Avatar, Button, Card, EmptyState, IconButton, inputClass } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -31,6 +32,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error ?? "Couldn't add that person");
       }
+      toast.success(`Added ${name.trim()} to the roster`);
       setName("");
       router.refresh();
     } catch (err) {
@@ -40,10 +42,11 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
     }
   }
 
-  async function handleRemove(id: string) {
+  async function handleRemove(id: string, name: string) {
     setRemovingId(id);
     try {
       await fetch(`/api/athletes/${id}`, { method: "DELETE" });
+      toast.success(`Removed ${name}`);
       router.refresh();
     } finally {
       setRemovingId(null);
@@ -106,7 +109,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
       <ConfirmDialog
         open={confirmingId !== null}
         onOpenChange={(open) => !open && setConfirmingId(null)}
-        onConfirm={() => confirmingId && handleRemove(confirmingId)}
+        onConfirm={() => confirmingAthlete && handleRemove(confirmingAthlete.id, confirmingAthlete.name)}
         pending={removingId !== null}
         title={`Remove ${confirmingAthlete?.name ?? "this teammate"}?`}
         description="They'll no longer show up when logging a team piece. Their past results stay on the record."

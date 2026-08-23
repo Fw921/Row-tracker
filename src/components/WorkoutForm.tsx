@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ListPlus, Save, X } from "lucide-react";
+import { toast } from "sonner";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
 import { Alert, Button, Card, Chip, Field, IconButton, Select, inputClass } from "@/components/ui";
@@ -94,6 +95,7 @@ export function WorkoutForm() {
         throw new Error(body?.error ? JSON.stringify(body.error) : "Failed to save workout");
       }
 
+      toast.success("Workout saved");
       router.push("/history");
       router.refresh();
     } catch (err) {

@@ -250,45 +250,6 @@ export function StatTile({
   );
 }
 
-/** Two-way (or more) toggle rendered as a single pill-shaped control. */
-export function SegmentedControl<T extends string>({
-  options,
-  value,
-  onChange,
-  className,
-}: {
-  options: { value: T; label: ReactNode }[];
-  value: T;
-  onChange: (value: T) => void;
-  className?: string;
-}) {
-  return (
-    <div
-      role="tablist"
-      className={clsx(
-        "inline-flex overflow-hidden rounded-lg border border-border bg-background p-0.5 text-sm",
-        className,
-      )}
-    >
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          role="tab"
-          aria-selected={value === opt.value}
-          onClick={() => onChange(opt.value)}
-          className={clsx(
-            "cursor-pointer rounded-md px-3 py-1.5 font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
-            value === opt.value ? "bg-surface text-accent shadow-sm" : "text-muted hover:text-foreground",
-          )}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 /** Shared text/number/date/select input styling used across every form. */
 export const inputClass =
   "w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-soft focus:border-accent focus:ring-2 focus:ring-accent/15";

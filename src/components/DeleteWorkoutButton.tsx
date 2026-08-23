@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { IconButton } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -15,6 +16,7 @@ export function DeleteWorkoutButton({ id }: { id: string }) {
     setPending(true);
     try {
       await fetch(`/api/workouts/${id}`, { method: "DELETE" });
+      toast.success("Workout deleted");
       setOpen(false);
       router.refresh();
     } finally {

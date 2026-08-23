@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckSquare, Save, Square, Users } from "lucide-react";
+import { toast } from "sonner";
 import { parseDuration } from "@/lib/pace";
 import { WORKOUT_TYPE_LABELS, DISTANCE_PRESETS } from "@/lib/constants";
 import {
@@ -14,10 +15,10 @@ import {
   Chip,
   EmptyState,
   Field,
-  SegmentedControl,
   Select,
   inputClass,
 } from "@/components/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WorkoutType } from "@/generated/prisma/enums";
 
 type Athlete = { id: string; name: string };
@@ -115,6 +116,7 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
       }
 
       const body = await res.json();
+      toast.success(`Piece saved for ${selectedAthletes.length} rower${selectedAthletes.length === 1 ? "" : "s"}`);
       router.push(`/team/${body.pieceGroup.id}`);
       router.refresh();
     } catch (err) {
@@ -174,54 +176,48 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
           <span className="mb-2 block text-sm font-medium text-foreground">
             What&apos;s the same for everyone?
           </span>
-          <div className="flex flex-wrap items-center gap-3">
-            <SegmentedControl
-              value={mode}
-              onChange={setMode}
-              options={[
-                { value: "distance", label: "Same distance" },
-                { value: "time", label: "Same time" },
-              ]}
-            />
+          <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
+            <TabsList>
+              <TabsTrigger value="distance">Same distance</TabsTrigger>
+              <TabsTrigger value="time">Same time</TabsTrigger>
+            </TabsList>
 
-            {mode === "distance" ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="number"
-                  value={targetDistance}
-                  onChange={(e) => setTargetDistance(e.target.value)}
-                  min={1}
-                  className={`${inputClass} w-28`}
-                />
-                <span className="text-sm text-muted">meters</span>
-                {DISTANCE_PRESETS.map((d) => (
-                  <Chip
-                    key={d}
-                    active={targetDistance === String(d)}
-                    onClick={() => setTargetDistance(String(d))}
-                  >
-                    {d}m
-                  </Chip>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={targetTime}
-                  onChange={(e) => setTargetTime(e.target.value)}
-                  placeholder="20:00"
-                  className={`${inputClass} w-28 tabular`}
-                />
-                <span className="text-sm text-muted">minutes:seconds</span>
-              </div>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-muted">
-            {mode === "distance"
-              ? "Everyone rows the same distance — you'll enter each rower's time."
-              : "Everyone rows the same time — you'll enter each rower's distance."}
-          </p>
+            <TabsContent value="distance" className="flex flex-wrap items-center gap-2">
+              <input
+                type="number"
+                value={targetDistance}
+                onChange={(e) => setTargetDistance(e.target.value)}
+                min={1}
+                className={`${inputClass} w-28`}
+              />
+              <span className="text-sm text-muted">meters</span>
+              {DISTANCE_PRESETS.map((d) => (
+                <Chip
+                  key={d}
+                  active={targetDistance === String(d)}
+                  onClick={() => setTargetDistance(String(d))}
+                >
+                  {d}m
+                </Chip>
+              ))}
+              <p className="mt-0.5 w-full text-xs text-muted">
+                Everyone rows the same distance — you&apos;ll enter each rower&apos;s time.
+              </p>
+            </TabsContent>
+            <TabsContent value="time" className="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                value={targetTime}
+                onChange={(e) => setTargetTime(e.target.value)}
+                placeholder="20:00"
+                className={`${inputClass} w-28 tabular`}
+              />
+              <span className="text-sm text-muted">minutes:seconds</span>
+              <p className="mt-0.5 w-full text-xs text-muted">
+                Everyone rows the same time — you&apos;ll enter each rower&apos;s distance.
+              </p>
+            </TabsContent>
+          </Tabs>
         </div>
       </Card>
 
