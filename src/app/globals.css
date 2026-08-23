@@ -146,3 +146,83 @@ body {
     transform: none !important;
   }
 }
+
+/* Welcome-page rowing scene (src/components/welcome/RowingScene.tsx) — a
+ * handful of CSS-animated SVG boat/wind/water accents layered over the
+ * hero's ShaderGradient, decorative and aria-hidden. Animation only exists
+ * inside this query, so a prefers-reduced-motion user gets the same static
+ * shapes with nothing declared to move — no override needed, there's just
+ * no `animation` property outside this block to turn off. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-row-boat-a {
+    animation: row-boat-drift-a 22s ease-in-out infinite;
+  }
+  .animate-row-boat-b {
+    animation: row-boat-drift-b 27s ease-in-out infinite;
+  }
+  .animate-row-wind-a {
+    animation: row-wind-drift 32s linear infinite;
+  }
+  .animate-row-wind-b {
+    animation: row-wind-drift 40s linear infinite;
+    animation-delay: -18s;
+  }
+  .animate-row-water {
+    animation: row-water-shimmer 14s linear infinite;
+  }
+}
+
+/* Small back-and-forth drift, not a full traversal — reads as a boat
+ * gently rocking/moving on calm water rather than crossing the screen, and
+ * `alternate`-free ease-in-out between two fixed points loops with no
+ * jump to hide, unlike a one-directional pass would need. Two variants
+ * (different distance/direction) so 2+ boats on screen don't move in
+ * lockstep. */
+@keyframes row-boat-drift-a {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(16px);
+  }
+}
+@keyframes row-boat-drift-b {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-14px);
+  }
+}
+
+/* One-directional drift for the wind wisps — fades in from fully
+ * transparent, drifts left-to-right, fades out before the loop resets, so
+ * the jump back to the start position happens while invisible instead of
+ * as a visible snap. */
+@keyframes row-wind-drift {
+  0% {
+    transform: translateX(-15%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(115%);
+    opacity: 0;
+  }
+}
+
+@keyframes row-water-shimmer {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 200px;
+  }
+}

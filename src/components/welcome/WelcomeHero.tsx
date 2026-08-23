@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Sailboat } from "lucide-react";
 import { buttonClassName } from "@/components/ui";
+import { RowingScene } from "@/components/welcome/RowingScene";
 
 // ssr: false — @react-three/fiber's Canvas needs a real WebGL context, which
 // doesn't exist during server rendering (see ShaderGradientBackground.tsx).
@@ -51,6 +52,11 @@ export function WelcomeHero() {
         aria-hidden
         style={{ background: "linear-gradient(180deg, rgba(10,16,14,0.55) 0%, rgba(10,16,14,0.25) 45%, rgba(10,16,14,0.65) 100%)" }}
       />
+
+      {/* Below the z-10 content that follows (DOM order alone puts it above
+       * the gradient/scrim, both z-index:auto) — a rowing scene, not a
+       * generic hero background. */}
+      <RowingScene />
 
       <div className="relative z-10 flex flex-1 flex-col px-6 py-8 sm:px-10">
         <div className="flex items-center gap-2.5 text-white">
