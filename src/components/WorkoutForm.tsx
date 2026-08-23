@@ -276,9 +276,9 @@ export function WorkoutForm() {
 
 function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
+    <h2 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
       {icon}
       {children}
-    </h3>
+    </h2>
   );
 }

@@ -61,64 +61,62 @@ export function ImportForm() {
 
   return (
     <div className="space-y-4">
-      <Card className="p-4 sm:p-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div
-            {...(!file && {
-              role: "button",
-              tabIndex: 0,
-              onClick: () => inputRef.current?.click(),
-              onKeyDown: (e: React.KeyboardEvent) =>
-                (e.key === "Enter" || e.key === " ") && inputRef.current?.click(),
-            })}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors ${
-              file ? "" : "cursor-pointer"
-            } ${dragging ? "border-accent bg-accent-soft" : "border-border hover:border-border-strong hover:bg-background"}`}
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".csv,text/csv"
-              className="sr-only"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
-            {file ? (
-              <>
-                <FileText className="h-6 w-6 text-accent" aria-hidden />
-                <p className="text-sm font-medium text-foreground">{file.name}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFile(null);
-                    if (inputRef.current) inputRef.current.value = "";
-                  }}
-                  className="flex cursor-pointer items-center gap-1 text-xs text-muted hover:text-positive"
-                >
-                  <X className="h-3 w-3" aria-hidden /> remove
-                </button>
-              </>
-            ) : (
-              <>
-                <Upload className="h-6 w-6 text-muted" aria-hidden />
-                <p className="text-sm font-medium text-foreground">
-                  Drag and drop your CSV, or click to browse
-                </p>
-                <p className="text-xs text-muted">Exported from log.concept2.com</p>
-              </>
-            )}
-          </div>
-          <Button type="submit" disabled={submitting || !file}>
-            <Upload className="h-4 w-4" aria-hidden />
-            {submitting ? "Importing…" : "Import"}
-          </Button>
-        </form>
-      </Card>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div
+          {...(!file && {
+            role: "button",
+            tabIndex: 0,
+            onClick: () => inputRef.current?.click(),
+            onKeyDown: (e: React.KeyboardEvent) =>
+              (e.key === "Enter" || e.key === " ") && inputRef.current?.click(),
+          })}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+          className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors ${
+            file ? "" : "cursor-pointer"
+          } ${dragging ? "border-accent bg-accent-soft" : "border-border hover:border-border-strong hover:bg-background"}`}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          {file ? (
+            <>
+              <FileText className="h-6 w-6 text-accent" aria-hidden />
+              <p className="text-sm font-medium text-foreground">{file.name}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null);
+                  if (inputRef.current) inputRef.current.value = "";
+                }}
+                className="flex cursor-pointer items-center gap-1 text-xs text-muted hover:text-positive"
+              >
+                <X className="h-3 w-3" aria-hidden /> remove
+              </button>
+            </>
+          ) : (
+            <>
+              <Upload className="h-6 w-6 text-muted" aria-hidden />
+              <p className="text-sm font-medium text-foreground">
+                Drag and drop your CSV, or click to browse
+              </p>
+              <p className="text-xs text-muted">Exported from log.concept2.com</p>
+            </>
+          )}
+        </div>
+        <Button type="submit" disabled={submitting || !file}>
+          <Upload className="h-4 w-4" aria-hidden />
+          {submitting ? "Importing…" : "Import"}
+        </Button>
+      </form>
 
       {error && <Alert>{error}</Alert>}
 
