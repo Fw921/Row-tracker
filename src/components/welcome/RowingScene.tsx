@@ -20,14 +20,18 @@ export function RowingScene() {
        * the viewport room) only join in from sm: up, per "reduce the
        * number of boats" on small screens. */}
       <BoatSilhouette className="bottom-[13%] left-[6%] w-20 text-white/45 animate-row-boat-a" />
-      <BoatSilhouette className="bottom-[24%] right-[8%] w-16 text-white/35 animate-row-boat-b" flip />
+      <BoatSilhouette className="bottom-[24%] right-[8%] w-16 text-white/35 animate-row-boat-b" />
       <BoatSilhouette className="hidden bottom-[7%] left-[27%] w-14 text-white/30 animate-row-boat-a sm:block" />
-      <BoatSilhouette className="hidden bottom-[17%] right-[26%] w-[4.5rem] text-white/35 animate-row-boat-b sm:block" flip />
+      <BoatSilhouette className="hidden bottom-[17%] right-[26%] w-[4.5rem] text-white/35 animate-row-boat-b sm:block" />
 
-      {/* Wind/current wisps — kept toward the top and lower thirds, away
-       * from the vertical band the centered content occupies. */}
-      <WindWisp className="left-0 top-[14%] w-40 opacity-10 animate-row-wind-a sm:w-56" />
-      <WindWisp className="hidden left-0 top-[78%] w-44 opacity-10 animate-row-wind-b sm:block sm:w-64" />
+      {/* Wind/current wisps — one over the left third, one over the
+       * middle, one over the right, each at a different height so they
+       * don't read as a single repeated row. The middle one sits low
+       * (below where the buttons land) rather than centered vertically,
+       * to stay out of the headline's band. */}
+      <WindWisp className="left-[2%] top-[12%] w-40 opacity-10 animate-row-wind-a sm:w-52" />
+      <WindWisp className="hidden left-[38%] top-[82%] w-40 opacity-10 animate-row-wind-b sm:block sm:w-56" />
+      <WindWisp className="right-[3%] top-[20%] w-36 opacity-10 animate-row-wind-a sm:w-48" />
 
       {/* Water shimmer band, bottom edge only. */}
       <div
@@ -42,20 +46,23 @@ export function RowingScene() {
 }
 
 /**
- * A single-scull hull, flattened to a thin lens shape with one short line
- * for an oar — deliberately not a detailed illustration, just enough to
- * read as "rowing shell" at a glance and at small size.
+ * A single-scull hull, flattened to a thin lens shape, with two short oar
+ * lines (one on each side) — deliberately not a detailed illustration,
+ * just enough to read as "rowing shell" at a glance and at small size.
+ * The hull and both oars are symmetric, so unlike an earlier one-oar
+ * version there's no need to mirror any instance — which also sidesteps
+ * a real bug that version had: a mirrored copy used an inline
+ * `transform: scaleX(-1)`, but the drift animation's own keyframes only
+ * ever set `transform: translateX(...)`, and a running CSS animation
+ * takes over its animated property entirely — so the mirror was silently
+ * lost the entire time the boat was actually drifting.
  */
-function BoatSilhouette({ className, flip }: { className: string; flip?: boolean }) {
+function BoatSilhouette({ className }: { className: string }) {
   return (
-    <svg
-      viewBox="0 0 120 20"
-      fill="none"
-      className={`absolute ${className}`}
-      style={flip ? { transform: "scaleX(-1)" } : undefined}
-    >
+    <svg viewBox="0 0 120 20" fill="none" className={`absolute ${className}`}>
       <path d="M4 10C24 3 96 3 116 10C96 17 24 17 4 10Z" fill="currentColor" />
-      <line x1="60" y1="10" x2="76" y2="-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="52" y1="10" x2="36" y2="-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="68" y1="10" x2="84" y2="-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
