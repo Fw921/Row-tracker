@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
-import { formatCount, formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
+import { formatDate, formatMeters, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit, classifyPacing } from "@/lib/pace";
 import { PACING_LABELS } from "@/lib/constants";
 import { SplitChart } from "@/components/SplitChart";
@@ -80,56 +80,56 @@ export default async function WorkoutDetailPage({
           label="Distance"
           value={formatMeters(workout.totalDistanceMeters)}
           numericValue={workout.totalDistanceMeters}
-          format={formatMeters}
+          format="meters"
         />
         <StatTile
           icon={<Timer className="h-3.5 w-3.5" aria-hidden />}
           label="Time"
           value={formatDuration(workout.totalTimeSeconds)}
           numericValue={workout.totalTimeSeconds}
-          format={formatDuration}
+          format="duration"
         />
         <StatTile
           icon={<Gauge className="h-3.5 w-3.5" aria-hidden />}
           label="Split /500m"
           value={formatSplit(workout.avgSplitSeconds500m)}
           numericValue={workout.avgSplitSeconds500m}
-          format={formatSplit}
+          format="split"
         />
         <StatTile
           icon={<HeartPulse className="h-3.5 w-3.5" aria-hidden />}
           label="Avg HR"
           value={workout.avgHeartRate ? `${workout.avgHeartRate} bpm` : "—"}
           numericValue={workout.avgHeartRate}
-          format={(n) => `${formatCount(n)} bpm`}
+          format="bpm"
         />
         <StatTile
           icon={<Heart className="h-3.5 w-3.5" aria-hidden />}
           label="Max HR"
           value={workout.maxHeartRate ? `${workout.maxHeartRate} bpm` : "—"}
           numericValue={workout.maxHeartRate}
-          format={(n) => `${formatCount(n)} bpm`}
+          format="bpm"
         />
         <StatTile
           icon={<Zap className="h-3.5 w-3.5" aria-hidden />}
           label="Avg watts"
           value={workout.avgWatts ? `${Math.round(workout.avgWatts)}W` : "—"}
           numericValue={workout.avgWatts}
-          format={(n) => `${formatCount(n)}W`}
+          format="watts"
         />
         <StatTile
           icon={<Activity className="h-3.5 w-3.5" aria-hidden />}
           label="Stroke rate"
           value={workout.avgStrokeRate ? `${workout.avgStrokeRate}/min` : "—"}
           numericValue={workout.avgStrokeRate}
-          format={(n) => `${formatCount(n)}/min`}
+          format="strokeRate"
         />
         <StatTile
           icon={<Wind className="h-3.5 w-3.5" aria-hidden />}
           label="Drag factor"
           value={workout.dragFactor ? String(workout.dragFactor) : "—"}
           numericValue={workout.dragFactor}
-          format={formatCount}
+          format="count"
         />
       </div>
 

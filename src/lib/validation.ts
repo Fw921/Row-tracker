@@ -88,3 +88,11 @@ export const goalInputSchema = z.discriminatedUnion("type", [
 ]);
 
 export type GoalInput = z.infer<typeof goalInputSchema>;
+
+// --- Profile ------------------------------------------------------------
+
+export const profileInputSchema = z.object({
+  name: z.string().trim().min(1, "Name can't be empty").max(100),
+});
+
+export type ProfileInput = z.infer<typeof profileInputSchema>;

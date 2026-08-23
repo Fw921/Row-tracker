@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AlertCircle, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 import { CountUp } from "@/components/motion/CountUp";
+import { CountUpStat, type StatFormatKind } from "@/components/motion/CountUpStat";
 
 export function Card({
   className,
@@ -116,29 +117,42 @@ export function Button({
   );
 }
 
-/** Small square button for a single icon action (remove, delete, …). */
-export function IconButton({
-  className,
-  children,
-  label,
-  tone = "muted",
-  ...props
-}: {
+type IconButtonOwnProps = {
   className?: string;
   children: ReactNode;
   label: string;
   tone?: "muted" | "danger";
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+};
+
+type IconButtonProps = IconButtonOwnProps &
+  (
+    | ({ href: string } & Omit<React.ComponentProps<typeof Link>, "href" | "className">)
+    | ({ href?: undefined } & React.ButtonHTMLAttributes<HTMLButtonElement>)
+  );
+
+/** Small square button for a single icon action (remove, delete, …). Pass
+ * `href` (same discriminated-union pattern as Button above) to render as a
+ * Link instead of a button — e.g. a profile icon that navigates. */
+export function IconButton({ className, children, label, tone = "muted", ...props }: IconButtonProps) {
+  const cls = clsx(
+    `inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-all duration-150 ${PRESS_SCALE} disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
+    tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
+    className,
+  );
+  if ("href" in props && props.href !== undefined) {
+    const { href, ...rest } = props as { href: string };
+    return (
+      <Link href={href} aria-label={label} title={label} className={cls} {...rest}>
+        {children}
+      </Link>
+    );
+  }
   return (
     <button
       aria-label={label}
       title={label}
-      className={clsx(
-        `inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-all duration-150 ${PRESS_SCALE} disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
-        tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
-        className,
-      )}
-      {...props}
+      className={cls}
+      {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
     >
       {children}
     </button>
@@ -236,7 +250,13 @@ export function StatTile({
   /** When set alongside `format`, the tile counts up to this number instead
    * of just rendering `value` — see CountUp.tsx. */
   numericValue?: number | null;
-  format?: (n: number) => string;
+  /** A plain function from a Client Component caller (the charts, GoalsCard,
+   * …), or a `StatFormatKind` string from a Server Component page
+   * (workouts/[id], profile) — a Server Component can't hand CountUp a
+   * function prop directly (React can only serialize plain data across that
+   * boundary), so it passes a kind name instead and CountUpStat resolves it
+   * to a real formatter from inside the client boundary. */
+  format?: ((n: number) => string) | StatFormatKind;
   tone?: "default" | "highlight";
 }) {
   return (
@@ -255,7 +275,15 @@ export function StatTile({
         <span className="text-xs font-medium">{label}</span>
       </div>
       <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">
-        {numericValue != null && format ? <CountUp value={numericValue} format={format} /> : value}
+        {numericValue != null && format ? (
+          typeof format === "string" ? (
+            <CountUpStat value={numericValue} kind={format} />
+          ) : (
+            <CountUp value={numericValue} format={format} />
+          )
+        ) : (
+          value
+        )}
       </div>
     </Card>
   );

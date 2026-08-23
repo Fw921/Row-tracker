@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { User, Users } from "lucide-react";
 import clsx from "clsx";
@@ -12,22 +13,24 @@ import { GoogleIcon } from "@/components/auth/GoogleIcon";
 type Role = "ATHLETE" | "COACH";
 
 export function SignupForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("ATHLETE");
   const [submitting, setSubmitting] = useState(false);
 
-  // Same caveat as LoginForm: no real auth backend to create an account
-  // against yet — this captures the intended fields (including role, which
+  // Same caveat as LoginForm: no real auth backend, so this doesn't create
+  // a new account — it captures the intended fields (including role, which
   // the data model doesn't have yet either) so wiring it up later is a
-  // matter of connecting this form, not redesigning it.
+  // matter of connecting this form, not redesigning it. In the meantime it
+  // drops you into the app's one existing account, same as logging in.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 350));
-    setSubmitting(false);
-    toast.info("Account creation isn't connected to a backend yet — this is a preview of the new sign-up screen.");
+    toast.info("Row Tracker doesn't create separate accounts yet — this opens the one account it has.");
+    router.push("/dashboard");
   }
 
   return (

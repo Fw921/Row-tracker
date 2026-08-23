@@ -2,27 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button, Field, inputClass } from "@/components/ui";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { GoogleIcon } from "@/components/auth/GoogleIcon";
 
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // NOTE: Row Tracker doesn't have real authentication yet (see
-  // src/lib/current-user.ts — it's still a single seeded account with no
-  // login). This screen is a visual redesign only; wiring it to a real
-  // auth backend (sessions, password hashing, Google OAuth) is separate
-  // follow-up work once an auth provider is chosen.
+  // src/lib/current-user.ts — it's still a single seeded account, and
+  // getCurrentUser() always resolves it regardless of who "logs in"). So
+  // this form doesn't check the email/password against anything — it just
+  // takes you into that one account, which is honest about all there is
+  // right now. Wiring this up to real sessions/password checks/Google
+  // OAuth is separate follow-up work once an auth provider is chosen.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 350));
-    setSubmitting(false);
-    toast.info("Login isn't connected to a backend yet — this is a preview of the new sign-in screen.");
+    toast.info("Row Tracker doesn't check passwords yet — this opens the one account it has.");
+    router.push("/dashboard");
   }
 
   return (
