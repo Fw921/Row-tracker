@@ -218,7 +218,8 @@ export function Alert({ children, className }: { children: ReactNode; className?
   );
 }
 
-/** A KPI-style tile: icon, label, and a big display-face number. */
+/** A KPI-style tile: icon, label, and a big mono-face number (see .tabular
+ * in globals.css — reads like an erg monitor readout). */
 export function StatTile({
   icon,
   label,
@@ -245,7 +246,7 @@ export function StatTile({
         )}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
+      <div className="tabular text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
     </Card>
   );
 }

@@ -130,6 +130,19 @@ export function StrokeMark({ className }: { className?: string }) {
   );
 }
 
+/** Nav wordmark glyph: the same ripple-and-stroke motif as <StrokeMark>,
+ * reduced to its simplest form, so the logo isn't a rowing emoji standing
+ * in for an actual mark. */
+export function Mark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 28 28" className={className} aria-hidden>
+      <circle cx={14} cy={16} r={4} fill="none" stroke="currentColor" strokeWidth={1.4} opacity={0.55} />
+      <circle cx={14} cy={16} r={2.1} fill="currentColor" />
+      <line x1={14} y1={16} x2={25} y2={5} stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Thin decorative rule used between sections instead of empty margin —
  * a single wave period rendered flat and small, echoing the background
  * field without repeating it at full size. */

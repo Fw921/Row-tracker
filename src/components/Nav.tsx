@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus, Sparkles } from "lucide-react";
+import { LayoutDashboard, History, Trophy, ClipboardList, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui";
+import { Mark } from "@/components/graphics";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -17,14 +18,14 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-surface/85 backdrop-blur supports-[backdrop-filter]:bg-surface/70">
+    <header className="sticky top-0 z-10 border-b border-border bg-surface">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2 font-display font-semibold tracking-tight">
           <span
             aria-hidden
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-base text-accent-foreground"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent"
           >
-            🚣
+            <Mark className="h-4 w-4" />
           </span>
           <span className="hidden sm:inline">Row Tracker</span>
         </Link>
@@ -51,9 +52,8 @@ export function Nav() {
         </nav>
         <Link
           href="/welcome"
-          className="hidden shrink-0 items-center gap-1 text-xs font-medium text-muted transition-colors hover:text-highlight md:inline-flex"
+          className="hidden shrink-0 text-xs font-medium text-muted underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent hover:decoration-accent md:inline-block"
         >
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
           Tour
         </Link>
         <Button href="/log" size="sm" className="shrink-0">

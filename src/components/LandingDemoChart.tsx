@@ -12,13 +12,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { TrendingDown } from "lucide-react";
 import { formatSplit } from "@/lib/pace";
 import { Badge, Card, Chip } from "@/components/ui";
 
-/** Six weeks of an imaginary rower's 2k splits, trending down — this is the
- * same shape DashboardCharts renders from real logged data, just seeded
- * with sample numbers so the landing page doesn't depend on a database. */
+/** Six weeks of an imaginary rower's 2k splits, trending down. Same shape
+ * DashboardCharts renders from real logged data, just seeded with sample
+ * numbers so the landing page doesn't depend on a database. */
 const SPLIT_TREND = [
   { week: "Wk 1", split: 118.4 },
   { week: "Wk 2", split: 116.1 },
@@ -57,7 +56,7 @@ export function LandingDemoChart() {
             {view === "split" ? "2000m split trend" : "Weekly training volume"}
           </h3>
           <p className="text-xs text-muted">
-            {view === "split" ? "Lower is faster — six weeks of test pieces" : "Kilometers logged per week"}
+            {view === "split" ? "Lower is faster. Six weeks of test pieces." : "Kilometers logged per week"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -102,9 +101,10 @@ export function LandingDemoChart() {
       </ResponsiveContainer>
 
       {view === "split" && (
-        <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-negative">
-          <TrendingDown className="h-3.5 w-3.5" aria-hidden />
-          8.7 seconds faster over six weeks — this is what your own trend looks like once you start logging.
+        <div className="mt-3 text-xs font-medium text-negative">
+          <span aria-hidden>↓ </span>
+          8.7 seconds faster over six weeks. This is what your own trend looks like once you start
+          logging.
         </div>
       )}
     </Card>

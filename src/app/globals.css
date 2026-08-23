@@ -26,12 +26,13 @@
   --accent-foreground: #1a0400;
   --accent-soft: #2a120c;
 
-  /* Electric lime — reserved for standout moments (PRs, 1st place), same
-   * role the old brass/gold played but turned up to fitness-app voltage. */
-  --highlight: #c9ff3d;
-  --highlight-strong: #e0ff85;
-  --highlight-foreground: #1b2200;
-  --highlight-soft: #232b06;
+  /* Regatta-clock brass — reserved for standout moments (PRs, 1st place).
+   * A real stopwatch-bezel gold reads as considered; neon lime read as a
+   * template default, so this replaced it. */
+  --highlight: #d9a942;
+  --highlight-strong: #eabf63;
+  --highlight-foreground: #241a02;
+  --highlight-soft: #2a2210;
 
   /* negative/positive read as "slower/faster", not good/bad, since a positive
    * split (fading) is the erg-room-bad one and a negative split is good. */
@@ -76,8 +77,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-plex-sans);
+  --font-display: var(--font-fraunces);
+  --font-mono: var(--font-plex-mono);
 }
 
 /* Light override for users whose system prefers light — still the same
@@ -125,12 +127,15 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Split times, splits, stats — set in the mono face so numbers read like
+ * an erg monitor readout, not body copy. */
 .tabular {
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
 .font-display {
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 ::selection {
