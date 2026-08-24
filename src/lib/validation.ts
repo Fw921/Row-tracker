@@ -65,3 +65,80 @@ export const teamPieceInputSchema = z.object({
 
 export type TeamEntryInput = z.infer<typeof teamEntrySchema>;
 export type TeamPieceInput = z.infer<typeof teamPieceInputSchema>;
+
+// --- Goals ------------------------------------------------------------
+
+export const goalInputSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("SPLIT_TARGET"),
+    label: z.string().max(100).optional(),
+    targetDistanceMeters: z.number().positive(),
+    targetSplitSeconds500m: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("TOTAL_METERS"),
+    label: z.string().max(100).optional(),
+    targetMeters: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("MONTHLY_WORKOUTS"),
+    label: z.string().max(100).optional(),
+    targetWorkoutsPerMonth: z.number().int().positive(),
+  }),
+]);
+
+export type GoalInput = z.infer<typeof goalInputSchema>;
+
+// --- Profile ------------------------------------------------------------
+
+export const profileInputSchema = z.object({
+  name: z.string().trim().min(1, "Name can't be empty").max(100),
+});
+
+export type ProfileInput = z.infer<typeof profileInputSchema>;
+
+// --- Athletes -------------------------------------------------------------
+
+export const athleteSideSchema = z.object({
+  side: z.enum(["PORT", "STARBOARD", "EITHER"]).nullable(),
+});
+
+export type AthleteSideInput = z.infer<typeof athleteSideSchema>;
+
+// --- Boats (lineup builder) ---------------------------------------------
+
+export const boatClassSchema = z.enum([
+  "EIGHT_PLUS",
+  "FOUR_PLUS",
+  "FOUR_MINUS",
+  "FOUR_X",
+  "PAIR",
+  "DOUBLE",
+  "SINGLE",
+]);
+
+export const boatInputSchema = z.object({
+  name: z.string().trim().max(100).optional(),
+  boatClass: boatClassSchema,
+  // "Copy previous lineup": seed the new boat's seats from an existing
+  // boat of the same class instead of leaving them all open.
+  copyFromBoatId: z.string().min(1).optional(),
+});
+
+export type BoatInput = z.infer<typeof boatInputSchema>;
+
+// A seat is at most one of athleteId (a roster rower) or guestName (an
+// unregistered "*" tile) — never both; enforced in the route, since which
+// one's wrong depends on which one the client meant to clear.
+export const boatSeatInputSchema = z.object({
+  seatIndex: z.number().int(),
+  athleteId: z.string().min(1).nullable(),
+  guestName: z.string().trim().max(60).nullable().optional(),
+});
+
+export const boatUpdateSchema = z.object({
+  name: z.string().trim().max(100).optional(),
+  seats: z.array(boatSeatInputSchema),
+});
+
+export type BoatUpdateInput = z.infer<typeof boatUpdateSchema>;
