@@ -27,28 +27,37 @@ function listDir(dir: string) {
 }
 
 export async function GET() {
-  const candidates = [
-    "/ROOT/src/generated/prisma",
-    "/var/task/src/generated",
-    "/var/task/src/generated/prisma",
-    "/vercel/path0/src/generated/prisma",
-    "/var/task/.prisma/client",
-    "/tmp/prisma-engines",
-    process.cwd(),
-    path.join(process.cwd(), "src/generated/prisma"),
-    path.join(__dirname),
-  ];
+  try {
+    // __dirname doesn't exist if this route handler ends up bundled as
+    // an ES module rather than CJS — guard it instead of letting a
+    // ReferenceError take down the whole diagnostic.
+    const dirname = typeof __dirname !== "undefined" ? __dirname : null;
 
-  const results: Record<string, unknown> = {};
-  for (const dir of candidates) {
-    results[dir] = listDir(dir);
+    const candidates = [
+      "/ROOT/src/generated/prisma",
+      "/var/task/src/generated",
+      "/var/task/src/generated/prisma",
+      "/vercel/path0/src/generated/prisma",
+      "/var/task/.prisma/client",
+      "/tmp/prisma-engines",
+      process.cwd(),
+      path.join(process.cwd(), "src/generated/prisma"),
+      ...(dirname ? [dirname] : []),
+    ];
+
+    const results: Record<string, unknown> = {};
+    for (const dir of candidates) {
+      results[dir] = listDir(dir);
+    }
+
+    return NextResponse.json({
+      cwd: process.cwd(),
+      dirname,
+      platform: process.platform,
+      arch: process.arch,
+      results,
+    });
+  } catch (err) {
+    return NextResponse.json({ topLevelError: String(err) }, { status: 500 });
   }
-
-  return NextResponse.json({
-    cwd: process.cwd(),
-    dirname: __dirname,
-    platform: process.platform,
-    arch: process.arch,
-    results,
-  });
 }
