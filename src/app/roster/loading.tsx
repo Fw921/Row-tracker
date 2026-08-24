@@ -3,7 +3,7 @@ import { Card, CardListSkeleton, PageHeaderSkeleton, Skeleton } from "@/componen
 export default function RosterLoading() {
   return (
     <div>
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton withIcon />
       <div className="max-w-lg space-y-6">
         <Card className="p-4">
           <div className="flex gap-2">
