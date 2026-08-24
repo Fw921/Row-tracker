@@ -8,18 +8,19 @@ import { CountUpStat, type StatFormatKind } from "@/components/motion/CountUpSta
 export function Card({
   className,
   children,
-  interactive,
 }: {
   className?: string;
   children: ReactNode;
+  /** No longer read — every card now gets the same tinted background,
+   * colored border, and hover-lift (see --card-bg/--card-border in
+   * globals.css), so there's nothing left to opt into. Kept in the type so
+   * existing call sites that still pass this prop don't need touching. */
   interactive?: boolean;
 }) {
   return (
     <div
       className={clsx(
-        "rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]",
-        interactive &&
-          "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-raised)]",
+        "rounded-xl border-2 border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-raised)]",
         className,
       )}
     >

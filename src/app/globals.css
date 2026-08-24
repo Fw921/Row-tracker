@@ -63,6 +63,14 @@
 
   --shadow-card: 0 1px 2px rgba(16, 26, 46, 0.05), 0 1px 1px rgba(16, 26, 46, 0.03);
   --shadow-raised: 0 8px 24px -8px rgba(16, 26, 46, 0.16), 0 2px 6px -2px rgba(16, 26, 46, 0.08);
+
+  /* Every Card's own look — a muted wash of the accent color instead of
+   * flat white, plus a colored border, so a card reads as "branded"
+   * without the saturated block-color treatment it's echoing (see Card's
+   * comment in ui.tsx). Built from --surface/--accent/--border rather than
+   * fixed hex so it re-derives correctly under the dark overrides below. */
+  --card-bg: color-mix(in oklab, var(--accent) 9%, var(--surface));
+  --card-border: color-mix(in oklab, var(--accent) 40%, var(--border));
 }
 
 @theme inline {
@@ -129,6 +137,12 @@
 
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
     --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+
+    /* Richer wash on dark surfaces — the same 9% mix reads as almost
+     * nothing over a near-black --surface, so this needs more accent to
+     * register as the same "tinted card" the light mode gets. */
+    --card-bg: color-mix(in oklab, var(--accent) 14%, var(--surface));
+    --card-border: color-mix(in oklab, var(--accent) 40%, var(--border));
   }
 }
 
