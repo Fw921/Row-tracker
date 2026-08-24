@@ -3,7 +3,7 @@ import { Card, CardListSkeleton, PageHeaderSkeleton, Skeleton } from "@/componen
 export default function HistoryLoading() {
   return (
     <div>
-      <PageHeaderSkeleton withAction />
+      <PageHeaderSkeleton withAction withIcon />
       <Card className="mb-4 p-3 sm:p-4">
         <div className="flex flex-wrap items-end gap-3">
           {Array.from({ length: 4 }, (_, i) => (

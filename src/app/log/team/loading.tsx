@@ -3,7 +3,7 @@ import { Card, PageHeaderSkeleton, Skeleton } from "@/components/ui";
 export default function LogTeamLoading() {
   return (
     <div>
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton withIcon />
       <div className="max-w-3xl space-y-6">
         <Card className="p-4 sm:p-6">
           <div className="grid gap-4 sm:grid-cols-2">

@@ -5,49 +5,64 @@
 @import "tw-animate-css";
 
 :root {
-  /* Cool paper background with a hint of green — reads as "boathouse", not
-   * generic SaaS blue-white. */
-  --background: #f3f6f4;
+  /* Sky/water palette, shared with the welcome page's ShaderGradient
+   * (blue/lavender) — a hint of that family everywhere, not a flat gray.
+   * See the "90/10" rule in the design brief this implements: this is the
+   * 10%, felt as a cool undertone rather than shown as a scene. */
+  --background: #f4f6fb;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --border: #e1e7e3;
-  --border-strong: #cdd7d1;
-  --foreground: #0e1a17;
-  --muted: #5b6b65;
-  --muted-soft: #8b978f;
+  --border: #e0e4f0;
+  --border-strong: #c7cee3;
+  --foreground: #101a2e;
+  --muted: #55617a;
+  /* Documented sub-4.5:1 on purpose (3.19:1 on --surface) — decorative/
+   * large-text use only (≥3:1 floor), never body copy. See Field's hint
+   * comment below for the same rule applied at the call site. */
+  --muted-soft: #8790a8;
 
-  /* Deep racing-shell teal — richer and slightly more saturated than a flat
-   * "brand blue" so buttons/links read as a considered color, not a default. */
-  --accent: #0a6a5a;
-  --accent-strong: #054e42;
+  /* Teal-blue accent — distinct from the chart palette's plainer sky blue
+   * (--chart-2) so a button/link always reads as "the brand color", not
+   * just another data series. #0a6d85 clears 5.9:1 for white text on it. */
+  --accent: #0a6d85;
+  --accent-strong: #054a5c;
   --accent-foreground: #ffffff;
-  --accent-soft: #e1f2ec;
+  --accent-soft: #e1f2f6;
 
-  /* Brass/regatta-clock gold, for standout moments (PRs, 1st place). */
+  /* Brass/regatta-clock gold, for standout moments (PRs, 1st place) and
+   * the "needs attention" end of a coach-facing status scale. Unchanged by
+   * the sky/water repaint — warm gold against cool blue is the intended
+   * contrast, not a clash. */
   --highlight: #ad7f1f;
   --highlight-strong: #7d5c14;
   --highlight-foreground: #ffffff;
   --highlight-soft: #f9f0dc;
 
   /* negative/positive read as "slower/faster", not good/bad, since a positive
-   * split (fading) is the erg-room-bad one and a negative split is good. */
-  --negative: #157a4f;
+   * split (fading) is the erg-room-bad one and a negative split is good.
+   * negative leans teal-green (not a flat traffic-light green) to stay in
+   * the same cool family as accent while still reading as unambiguously
+   * "good" next to positive's red. */
+  --negative: #087a52;
   --positive: #bf4a1e;
   /* Text-on-tint variant (e.g. Alert body, "slower" badge text) — #bf4a1e at
    * 10% over surface only measures 4.34:1, short of the 4.5:1 AA floor for
    * body text. This darkened value clears 5.4:1+ on that tint. */
   --positive-strong: #a5401a;
 
-  /* Supporting hues for multi-series charts, chosen to sit alongside accent
-   * and highlight without fighting them. */
+  /* Restrained blue/teal/lavender family for multi-series charts — sky
+   * blue and a soft indigo/lavender alongside accent's teal-blue, gold for
+   * a PR/highlight series, and a deep navy for a 5th when one's needed.
+   * Kept to hues that already belong to the palette above, not one-off
+   * chart-only colors. */
   --chart-1: var(--accent);
-  --chart-2: var(--highlight);
-  --chart-3: #5b57b8;
-  --chart-4: #b5451b;
-  --chart-5: #3d7ea6;
+  --chart-2: #4f8fdb;
+  --chart-3: #6f6fd6;
+  --chart-4: var(--highlight);
+  --chart-5: #2f4f81;
 
-  --shadow-card: 0 1px 2px rgba(14, 26, 23, 0.05), 0 1px 1px rgba(14, 26, 23, 0.03);
-  --shadow-raised: 0 8px 24px -8px rgba(14, 26, 23, 0.16), 0 2px 6px -2px rgba(14, 26, 23, 0.08);
+  --shadow-card: 0 1px 2px rgba(16, 26, 46, 0.05), 0 1px 1px rgba(16, 26, 46, 0.03);
+  --shadow-raised: 0 8px 24px -8px rgba(16, 26, 46, 0.16), 0 2px 6px -2px rgba(16, 26, 46, 0.08);
 }
 
 @theme inline {
@@ -81,36 +96,36 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a100e;
-    --surface: #101815;
-    --surface-raised: #141e1a;
-    --border: #223029;
-    --border-strong: #2d3f36;
-    --foreground: #eef3f0;
-    --muted: #8fa199;
-    --muted-soft: #647169;
+    --background: #0a0f1c;
+    --surface: #111827;
+    --surface-raised: #16203a;
+    --border: #22304a;
+    --border-strong: #2d3f5c;
+    --foreground: #eef1f8;
+    --muted: #8f9ab3;
+    --muted-soft: #647089;
 
-    --accent: #33bda6;
-    --accent-strong: #5fd0bc;
-    --accent-foreground: #04211f;
-    --accent-soft: #123330;
+    --accent: #33b8c9;
+    --accent-strong: #6fd4e0;
+    --accent-foreground: #04252b;
+    --accent-soft: #10333d;
 
     --highlight: #d9a942;
     --highlight-strong: #eabf63;
     --highlight-foreground: #241a02;
     --highlight-soft: #2a2210;
 
-    --negative: #4fd48a;
+    --negative: #4fd4a8;
     --positive: #ff9466;
     /* Dark surfaces already give #ff9466 7:1+ on its own tint — no darkening
      * needed here, unlike the light-mode value above. */
     --positive-strong: #ff9466;
 
     --chart-1: var(--accent);
-    --chart-2: var(--highlight);
+    --chart-2: #6fa8e8;
     --chart-3: #948dee;
-    --chart-4: #ff8f66;
-    --chart-5: #6fb6e0;
+    --chart-4: var(--highlight);
+    --chart-5: #4a6fa8;
 
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
     --shadow-raised: 0 12px 28px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
@@ -121,6 +136,26 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* App-wide sky/water atmosphere (src/app/layout.tsx) — the "10%" in the
+ * design brief's 90% clean-UI / 10% rowing-atmosphere rule. One `fixed`
+ * glow behind every route (Nav and every Card are opaque, so it only ever
+ * shows in the gaps around them — never behind a table's or chart's own
+ * content), masked to fade out within roughly one viewport's height so it
+ * can't tile or repeat down a long page. That fade is also what makes the
+ * "landing page atmospheric -> dashboard subtle -> tables clean" ladder
+ * happen for free: a short page (profile, boats) sees it near the header;
+ * a long one (history, team) scrolls past it into flat, clean background,
+ * with no per-page logic needed. Skipped for /, /login, /signup — those
+ * already carry their own full-bleed hero backgrounds (WelcomeHero,
+ * AuthLayout) that would just paint over this anyway. */
+.app-atmosphere {
+  background:
+    radial-gradient(640px 420px at 8% -120px, color-mix(in oklab, var(--accent) 8%, transparent), transparent 70%),
+    radial-gradient(560px 380px at 96% -100px, color-mix(in oklab, var(--chart-3) 7%, transparent), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
 }
 
 .tabular {
@@ -134,4 +169,95 @@ body {
 ::selection {
   background: var(--accent-soft);
   color: var(--accent-strong);
+}
+
+/* Scroll-triggered reveals (src/components/motion/Reveal.tsx) depend on an
+ * IntersectionObserver actually firing, which never happens when printing
+ * — there's no scrolling. Without this, content below the fold would print
+ * as permanently-invisible blank space. */
+@media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Welcome-page rowing scene (src/components/welcome/RowingScene.tsx) — a
+ * handful of CSS-animated SVG boat/wind/water accents layered over the
+ * hero's ShaderGradient, decorative and aria-hidden. Animation only exists
+ * inside this query, so a prefers-reduced-motion user gets the same static
+ * shapes with nothing declared to move — no override needed, there's just
+ * no `animation` property outside this block to turn off. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-row-boat-a {
+    animation: row-boat-drift-a 22s ease-in-out infinite;
+  }
+  .animate-row-boat-b {
+    animation: row-boat-drift-b 27s ease-in-out infinite;
+  }
+  .animate-row-wind-a {
+    animation: row-wind-drift 32s linear infinite;
+  }
+  .animate-row-wind-b {
+    animation: row-wind-drift 40s linear infinite;
+    animation-delay: -18s;
+  }
+  .animate-row-water {
+    animation: row-water-shimmer 14s linear infinite;
+  }
+}
+
+/* Small back-and-forth drift, not a full traversal — reads as a boat
+ * gently rocking/moving on calm water rather than crossing the screen, and
+ * `alternate`-free ease-in-out between two fixed points loops with no
+ * jump to hide, unlike a one-directional pass would need. Two variants
+ * (different distance/direction) so 2+ boats on screen don't move in
+ * lockstep. */
+@keyframes row-boat-drift-a {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(16px);
+  }
+}
+@keyframes row-boat-drift-b {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-14px);
+  }
+}
+
+/* One-directional drift for the wind wisps — fades in from fully
+ * transparent, drifts left-to-right, fades out before the loop resets, so
+ * the jump back to the start position happens while invisible instead of
+ * as a visible snap. */
+@keyframes row-wind-drift {
+  0% {
+    transform: translateX(-15%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(115%);
+    opacity: 0;
+  }
+}
+
+@keyframes row-water-shimmer {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 200px;
+  }
 }

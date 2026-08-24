@@ -2,6 +2,8 @@ import clsx from "clsx";
 import Link from "next/link";
 import { AlertCircle, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
+import { CountUp } from "@/components/motion/CountUp";
+import { CountUpStat, type StatFormatKind } from "@/components/motion/CountUpStat";
 
 export function Card({
   className,
@@ -16,7 +18,8 @@ export function Card({
     <div
       className={clsx(
         "rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]",
-        interactive && "transition-shadow hover:shadow-[var(--shadow-raised)]",
+        interactive &&
+          "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-raised)]",
         className,
       )}
     >
@@ -26,37 +29,47 @@ export function Card({
 }
 
 export function PageHeader({
-  eyebrow,
   title,
   description,
   action,
+  icon,
 }: {
-  eyebrow?: string;
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  /** Same icon-in-a-colored-badge recipe as the landing page's feature
+   * cards and StatTile — an easy, low-risk way to carry that page's visual
+   * language into the app itself without touching how data pages read. */
+  icon?: ReactNode;
 }) {
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-      <div>
-        {eyebrow && (
-          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            {eyebrow}
-          </div>
+      <div className="flex items-start gap-3">
+        {icon && (
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
+            {icon}
+          </span>
         )}
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
-          {title}
-        </h1>
-        {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+            {title}
+          </h1>
+          {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
+        </div>
       </div>
       {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
     </div>
   );
 }
 
+// One press-scale value, reused by every clickable control in the app
+// (buttons, icon buttons, chips) — see Reveal.tsx's comment on the same
+// idea for scroll reveals: one consistent recipe, not a different feel
+// per component.
+const PRESS_SCALE = "active:scale-[0.97]";
+
 const buttonBase =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface";
+  `inline-flex items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${PRESS_SCALE} disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-surface`;
 const buttonSizes = { sm: "px-2.5 py-1.5 text-xs", md: "px-4 py-2", lg: "px-5 py-2.5 text-base" };
 const buttonVariants = {
   primary: "bg-accent text-accent-foreground shadow-sm hover:bg-accent-strong",
@@ -116,29 +129,42 @@ export function Button({
   );
 }
 
-/** Small square button for a single icon action (remove, delete, …). */
-export function IconButton({
-  className,
-  children,
-  label,
-  tone = "muted",
-  ...props
-}: {
+type IconButtonOwnProps = {
   className?: string;
   children: ReactNode;
   label: string;
   tone?: "muted" | "danger";
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+};
+
+type IconButtonProps = IconButtonOwnProps &
+  (
+    | ({ href: string } & Omit<React.ComponentProps<typeof Link>, "href" | "className">)
+    | ({ href?: undefined } & React.ButtonHTMLAttributes<HTMLButtonElement>)
+  );
+
+/** Small square button for a single icon action (remove, delete, …). Pass
+ * `href` (same discriminated-union pattern as Button above) to render as a
+ * Link instead of a button — e.g. a profile icon that navigates. */
+export function IconButton({ className, children, label, tone = "muted", ...props }: IconButtonProps) {
+  const cls = clsx(
+    `inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-all duration-150 ${PRESS_SCALE} disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
+    tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
+    className,
+  );
+  if ("href" in props && props.href !== undefined) {
+    const { href, ...rest } = props as { href: string };
+    return (
+      <Link href={href} aria-label={label} title={label} className={cls} {...rest}>
+        {children}
+      </Link>
+    );
+  }
   return (
     <button
       aria-label={label}
       title={label}
-      className={clsx(
-        "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
-        tone === "danger" ? "text-muted hover:bg-positive/10 hover:text-positive" : "text-muted hover:bg-background hover:text-foreground",
-        className,
-      )}
-      {...props}
+      className={cls}
+      {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
     >
       {children}
     </button>
@@ -191,7 +217,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
       {icon && (
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-2xl">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
           {icon}
         </div>
       )}
@@ -218,21 +244,43 @@ export function Alert({ children, className }: { children: ReactNode; className?
   );
 }
 
-/** A KPI-style tile: icon, label, and a big display-face number. */
+/** A KPI-style tile: icon, label, and a big display-face number. The
+ * number is deliberately the loudest thing in the tile — everything else
+ * (icon, label, context) is sized and muted to stay out of its way. */
 export function StatTile({
   icon,
   label,
   value,
+  numericValue,
+  format,
   tone = "default",
+  context,
 }: {
   icon?: ReactNode;
   label: string;
+  /** Always the display fallback — used as-is when there's no numericValue
+   * (e.g. a "—" empty state), and as the pre-hydration/initial paint value
+   * otherwise. */
   value: string;
+  /** When set alongside `format`, the tile counts up to this number instead
+   * of just rendering `value` — see CountUp.tsx. */
+  numericValue?: number | null;
+  /** A plain function from a Client Component caller (the charts, GoalsCard,
+   * …), or a `StatFormatKind` string from a Server Component page
+   * (workouts/[id], profile) — a Server Component can't hand CountUp a
+   * function prop directly (React can only serialize plain data across that
+   * boundary), so it passes a kind name instead and CountUpStat resolves it
+   * to a real formatter from inside the client boundary. */
+  format?: ((n: number) => string) | StatFormatKind;
   tone?: "default" | "highlight";
+  /** A short, real comparison already computed by the caller — "Season
+   * best", "+2.4s from PR" — never a placeholder. Omit entirely rather
+   * than invent one when there's nothing genuine to say. */
+  context?: ReactNode;
 }) {
   return (
     <Card className="p-3.5 sm:p-4">
-      <div className="mb-1.5 flex items-center gap-1.5 text-muted">
+      <div className="mb-2 flex items-center gap-1.5 text-muted">
         {icon && (
           <span
             className={clsx(
@@ -245,7 +293,18 @@ export function StatTile({
         )}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">{value}</div>
+      <div className="tabular font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        {numericValue != null && format ? (
+          typeof format === "string" ? (
+            <CountUpStat value={numericValue} kind={format} />
+          ) : (
+            <CountUp value={numericValue} format={format} />
+          )
+        ) : (
+          value
+        )}
+      </div>
+      {context && <div className="mt-1 text-xs text-muted">{context}</div>}
     </Card>
   );
 }
@@ -310,7 +369,7 @@ export function Chip({
     <button
       type="button"
       className={clsx(
-        "cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+        `cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all duration-150 ${PRESS_SCALE} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
         active
           ? "border-accent bg-accent-soft text-accent-strong"
           : "border-border text-muted hover:border-border-strong hover:bg-background",
@@ -327,14 +386,25 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={clsx("animate-pulse rounded-md bg-border/70", className)} aria-hidden />;
 }
 
-/** Skeleton for a PageHeader — title, eyebrow, and description bars. */
-export function PageHeaderSkeleton({ withAction }: { withAction?: boolean }) {
+/** Skeleton for a PageHeader — title and description bars. */
+export function PageHeaderSkeleton({
+  withAction,
+  withIcon,
+}: {
+  withAction?: boolean;
+  /** Match the loaded PageHeader's `icon` badge so the skeleton doesn't
+   * shift layout once real content replaces it — pass this on any page
+   * whose PageHeader is given an `icon`. */
+  withIcon?: boolean;
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-      <div className="space-y-2">
-        <Skeleton className="h-3 w-20" />
-        <Skeleton className="h-7 w-48" />
-        <Skeleton className="h-4 w-72 max-w-full" />
+      <div className="flex items-start gap-3">
+        {withIcon && <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />}
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+        </div>
       </div>
       {withAction && <Skeleton className="h-9 w-36 rounded-lg" />}
     </div>
