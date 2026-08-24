@@ -5,8 +5,16 @@
 // real accounts later is additive, not a rewrite.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  // Vercel's build container and the Lambda that actually runs the
+  // deployed function use different base images: the build machine's
+  // own "native" target isn't what the function runs on, so relying on
+  // the default (native-only) binaryTargets generates an engine that
+  // never matches at runtime. rhel-openssl-3.0.x is what Vercel's
+  // Node.js function runtime needs; native keeps local dev/tests working
+  // on whatever OS you're developing on.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
