@@ -8,9 +8,9 @@ import {
   BarChart3,
   CalendarRange,
   Gauge,
+  Lightbulb,
   Medal,
   Route,
-  Sparkles,
   Timer,
   TrendingDown,
   TrendingUp,
@@ -380,12 +380,12 @@ export function DashboardCharts({
       {/* 8. Training insights */}
       <Reveal>
         <h2 className="mb-2 flex items-center gap-1.5 font-display text-sm font-semibold text-foreground">
-          <Sparkles className="h-4 w-4 text-accent" aria-hidden />
+          <Lightbulb className="h-4 w-4 text-accent" aria-hidden />
           Training insights
         </h2>
         {insights.length === 0 ? (
           <EmptyState
-            icon={<Sparkles className="h-6 w-6" aria-hidden />}
+            icon={<Lightbulb className="h-6 w-6" aria-hidden />}
             title="Not enough data yet"
             description="Log a few more pieces and Row Tracker will start surfacing trends here."
           />
