@@ -130,7 +130,7 @@ export function TeamPieceForm({ athletes }: { athletes: Athlete[] }) {
     return (
       <div className="max-w-lg">
         <EmptyState
-          icon="🚣"
+          icon={<Users className="h-6 w-6" aria-hidden />}
           title="No teammates on your roster yet"
           description="Add the boat first, then come back to log a piece for everyone at once."
           action={<Button href="/roster">Go to roster</Button>}

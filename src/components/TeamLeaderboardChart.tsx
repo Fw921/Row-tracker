@@ -39,6 +39,8 @@ export function TeamLeaderboardChart({ rows }: { rows: Row[] }) {
         <Bar
           dataKey="split"
           radius={[0, 4, 4, 0]}
+          animationDuration={600}
+          animationEasing="ease-out"
           label={{
             position: "right",
             formatter: (v: unknown) => formatSplit(Number(v)),
