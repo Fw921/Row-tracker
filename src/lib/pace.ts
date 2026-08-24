@@ -80,6 +80,8 @@ export function resolveTeamEntryTotals(
     : { totalDistanceMeters: value, totalTimeSeconds: target };
 }
 
+export type PacingResult = "negative" | "positive" | "even" | "unknown";
+
 /**
  * Classify pacing strategy for a piece from its ordered splits, comparing
  * the average of the first half of splits to the second half.
@@ -88,7 +90,7 @@ export function resolveTeamEntryTotals(
 export function classifyPacing(
   splitSeconds: number[],
   evenThreshold = 0.5,
-): "negative" | "positive" | "even" | "unknown" {
+): PacingResult {
   if (splitSeconds.length < 2) return "unknown";
 
   const mid = Math.floor(splitSeconds.length / 2);

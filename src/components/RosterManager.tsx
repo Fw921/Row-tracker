@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, Avatar, Button, Card, EmptyState, IconButton, inputClass } from "@/components/ui";
+import { Alert, Avatar, Button, Card, EmptyState, IconButton, Select, inputClass } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { RevealList, RevealListItem } from "@/components/motion/Reveal";
+import { SIDE_INFO } from "@/lib/boats";
+import type { RowingSide } from "@/generated/prisma/enums";
 
-type Athlete = { id: string; name: string };
+type Athlete = { id: string; name: string; side?: RowingSide | null };
 
 export function RosterManager({ athletes }: { athletes: Athlete[] }) {
   const router = useRouter();
@@ -54,6 +57,18 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
     }
   }
 
+  // Rigging-side preference — shown as a color cue in the boat builder
+  // (src/components/BoatSeatEditor.tsx), set here since the roster is where
+  // an athlete's standing details live.
+  async function handleSideChange(id: string, side: RowingSide | "") {
+    const res = await fetch(`/api/athletes/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ side: side || null }),
+    });
+    if (res.ok) router.refresh();
+  }
+
   const confirmingAthlete = athletes.find((a) => a.id === confirmingId);
 
   return (
@@ -79,30 +94,51 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
 
       {athletes.length === 0 ? (
         <EmptyState
-          icon="🚣"
+          icon={<Users className="h-6 w-6" aria-hidden />}
           title="No teammates yet"
           description="Add everyone in the boat here, then you can log a piece for the whole crew at once."
         />
       ) : (
         <Card>
-          <ul className="divide-y divide-border">
+          <RevealList className="divide-y divide-border">
             {athletes.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <Avatar name={a.name} />
-                  <span className="text-sm font-medium">{a.name}</span>
+              <RevealListItem key={a.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="relative shrink-0">
+                    <Avatar name={a.name} />
+                    {a.side && (
+                      <span
+                        aria-hidden
+                        className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${SIDE_INFO[a.side].dotClassName}`}
+                      />
+                    )}
+                  </span>
+                  <span className="truncate text-sm font-medium">{a.name}</span>
                 </div>
-                <IconButton
-                  label={`Remove ${a.name}`}
-                  tone="danger"
-                  onClick={() => setConfirmingId(a.id)}
-                  disabled={removingId === a.id}
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                </IconButton>
-              </li>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Select
+                    aria-label={`${a.name}'s rigging side`}
+                    value={a.side ?? ""}
+                    onChange={(e) => handleSideChange(a.id, e.target.value as RowingSide | "")}
+                    className="w-32 text-xs"
+                  >
+                    <option value="">No preference</option>
+                    <option value="PORT">Port</option>
+                    <option value="STARBOARD">Starboard</option>
+                    <option value="EITHER">Either side</option>
+                  </Select>
+                  <IconButton
+                    label={`Remove ${a.name}`}
+                    tone="danger"
+                    onClick={() => setConfirmingId(a.id)}
+                    disabled={removingId === a.id}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                  </IconButton>
+                </div>
+              </RevealListItem>
             ))}
-          </ul>
+          </RevealList>
         </Card>
       )}
 

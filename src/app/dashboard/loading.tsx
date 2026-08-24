@@ -3,7 +3,7 @@ import { Card, PageHeaderSkeleton, Skeleton, StatGridSkeleton } from "@/componen
 export default function DashboardLoading() {
   return (
     <div>
-      <PageHeaderSkeleton withAction />
+      <PageHeaderSkeleton withAction withIcon />
       <div className="space-y-8">
         <StatGridSkeleton count={4} />
         <Card className="p-4 sm:p-5">

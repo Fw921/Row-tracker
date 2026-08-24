@@ -40,7 +40,13 @@ export function SplitChart({ splits }: { splits: SplitPoint[] }) {
             fontSize: 12,
           }}
         />
-        <Bar dataKey="split" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="split"
+          fill="var(--accent)"
+          radius={[4, 4, 0, 0]}
+          animationDuration={600}
+          animationEasing="ease-out"
+        />
       </BarChart>
     </ResponsiveContainer>
   );

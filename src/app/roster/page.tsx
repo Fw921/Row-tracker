@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { PageHeader } from "@/components/ui";
@@ -10,13 +11,13 @@ export default async function RosterPage() {
   const athletes = await prisma.athlete.findMany({
     where: { userId: user.id, archived: false },
     orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, side: true },
   });
 
   return (
     <div>
       <PageHeader
-        eyebrow={`Team · ${athletes.length} rower${athletes.length === 1 ? "" : "s"}`}
+        icon={<ClipboardList className="h-4.5 w-4.5" aria-hidden />}
         title="Roster"
         description="Everyone you might log a piece for. Add the boat once, then pick from this list whenever you enter a team piece."
       />

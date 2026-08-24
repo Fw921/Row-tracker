@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { WorkoutForm } from "@/components/WorkoutForm";
 import { PageHeader } from "@/components/ui";
 
@@ -7,7 +7,7 @@ export default function LogPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
-        eyebrow="New entry"
+        icon={<Plus className="h-4.5 w-4.5" aria-hidden />}
         title="Log a workout"
         description="Enter a 2k/5k test piece, a training row, or anything else off the erg monitor."
         action={
