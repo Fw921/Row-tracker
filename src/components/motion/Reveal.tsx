@@ -100,15 +100,31 @@ export function RevealTableBody({ children, className }: { children: ReactNode; 
   return <tbody className={className}>{children}</tbody>;
 }
 
+const rowFade: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: REVEAL_TRANSITION },
+};
+
+// `animate`, not `whileInView` — confirmed live that a <tr>'s whileInView
+// (with the exact same once/margin config RevealListItem uses successfully
+// on a <li>) permanently gets stuck at opacity: 0 for every row after the
+// first, on every table this app has: not a timing race (waited 5s, forced
+// a scroll, no change) and not the y-transform (removing it changed
+// nothing either) — something about a <tr>'s geometry and Framer Motion's
+// IntersectionObserver just never agrees it's intersecting. `animate`
+// sidesteps IntersectionObserver entirely: it fires the moment the row
+// mounts, so there's nothing left for that interaction to break. The
+// tradeoff is losing "wait until scrolled into view" for table rows
+// specifically — acceptable, since every table in this app is short
+// enough that scroll-gating was never buying much anyway.
 export function RevealRow({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.tr
       data-reveal
       className={className}
       initial={useInitialState()}
-      whileInView="visible"
-      viewport={REVEAL_VIEWPORT}
-      variants={staggerItem}
+      animate="visible"
+      variants={rowFade}
     >
       {children}
     </motion.tr>
