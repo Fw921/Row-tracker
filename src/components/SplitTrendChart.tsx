@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import {
+  Area,
   CartesianGrid,
   ComposedChart,
   Line,
@@ -83,13 +84,21 @@ export function SplitTrendChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={chartData} margin={{ top: 16, right: 24, left: 8, bottom: 0 }}>
+        <defs>
+          <linearGradient id="splitTrendFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.16} />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-        <XAxis dataKey="date" tick={axisTick} />
+        <XAxis dataKey="date" tick={axisTick} axisLine={false} tickLine={false} />
         <YAxis
           reversed
           tickFormatter={(v) => formatSplit(v)}
           tick={axisTick}
           width={64}
+          axisLine={false}
+          tickLine={false}
           domain={["dataMin - 2", "dataMax + 2"]}
         />
         <Tooltip
@@ -120,13 +129,22 @@ export function SplitTrendChart({
             legendType="none"
           />
         )}
+        <Area
+          type="monotone"
+          dataKey="split"
+          stroke="none"
+          fill="url(#splitTrendFill)"
+          isAnimationActive={false}
+          legendType="none"
+          activeDot={false}
+        />
         <Line
           type="monotone"
           dataKey="split"
           stroke="var(--accent)"
           strokeWidth={2.5}
-          dot={{ r: 3 }}
-          activeDot={{ r: 5 }}
+          dot={{ r: 3, fill: "var(--accent)", stroke: "var(--surface)", strokeWidth: 1.5 }}
+          activeDot={{ r: 5, fill: "var(--accent)", stroke: "var(--surface)", strokeWidth: 2 }}
           animationDuration={600}
           animationEasing="ease-out"
         />

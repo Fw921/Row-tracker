@@ -244,7 +244,9 @@ export function Alert({ children, className }: { children: ReactNode; className?
   );
 }
 
-/** A KPI-style tile: icon, label, and a big display-face number. */
+/** A KPI-style tile: icon, label, and a big display-face number. The
+ * number is deliberately the loudest thing in the tile — everything else
+ * (icon, label, context) is sized and muted to stay out of its way. */
 export function StatTile({
   icon,
   label,
@@ -252,6 +254,7 @@ export function StatTile({
   numericValue,
   format,
   tone = "default",
+  context,
 }: {
   icon?: ReactNode;
   label: string;
@@ -270,10 +273,14 @@ export function StatTile({
    * to a real formatter from inside the client boundary. */
   format?: ((n: number) => string) | StatFormatKind;
   tone?: "default" | "highlight";
+  /** A short, real comparison already computed by the caller — "Season
+   * best", "+2.4s from PR" — never a placeholder. Omit entirely rather
+   * than invent one when there's nothing genuine to say. */
+  context?: ReactNode;
 }) {
   return (
     <Card className="p-3.5 sm:p-4">
-      <div className="mb-1.5 flex items-center gap-1.5 text-muted">
+      <div className="mb-2 flex items-center gap-1.5 text-muted">
         {icon && (
           <span
             className={clsx(
@@ -286,7 +293,7 @@ export function StatTile({
         )}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className="tabular font-display text-xl font-semibold text-foreground sm:text-2xl">
+      <div className="tabular font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
         {numericValue != null && format ? (
           typeof format === "string" ? (
             <CountUpStat value={numericValue} kind={format} />
@@ -297,6 +304,7 @@ export function StatTile({
           value
         )}
       </div>
+      {context && <div className="mt-1 text-xs text-muted">{context}</div>}
     </Card>
   );
 }

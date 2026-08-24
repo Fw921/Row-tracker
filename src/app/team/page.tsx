@@ -34,7 +34,11 @@ export default async function TeamIndexPage() {
   if (athletes.length === 0 && pieceGroups.length === 0) {
     return (
       <div className="max-w-lg">
-        <PageHeader icon={<Trophy className="h-4.5 w-4.5" aria-hidden />} title="Team" />
+        <PageHeader
+          icon={<Trophy className="h-4.5 w-4.5" aria-hidden />}
+          title="Team"
+          description="Everyone on the roster, and every piece you've logged for the whole boat at once."
+        />
         <EmptyState
           icon={<Flag className="h-6 w-6" aria-hidden />}
           title="No team data yet"

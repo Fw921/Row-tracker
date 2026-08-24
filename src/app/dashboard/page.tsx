@@ -39,7 +39,11 @@ export default async function DashboardPage() {
   if (workouts.length === 0 && recentPieceGroups.length === 0) {
     return (
       <div className="max-w-lg">
-        <PageHeader icon={<LayoutDashboard className="h-4.5 w-4.5" aria-hidden />} title="Dashboard" />
+        <PageHeader
+          icon={<LayoutDashboard className="h-4.5 w-4.5" aria-hidden />}
+          title="Dashboard"
+          description="Your performance at a glance — recent results, trends, and how you stack up against your PRs."
+        />
         <EmptyState
           icon={<Activity className="h-6 w-6" aria-hidden />}
           title="Nothing logged yet"
@@ -94,6 +98,7 @@ export default async function DashboardPage() {
       <PageHeader
         icon={<LayoutDashboard className="h-4.5 w-4.5" aria-hidden />}
         title="Dashboard"
+        description="Your performance at a glance — recent results, trends, and how you stack up against your PRs."
         action={
           <Button href="/log/team">
             <Plus className="h-4 w-4" aria-hidden />

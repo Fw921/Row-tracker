@@ -72,6 +72,16 @@ export function DashboardCharts({
   const current2k = mostRecentInBucket(workouts, 2000);
   const pr2k = bestSplitForBucket(workouts, 2000);
   const pr5k = bestSplitForBucket(workouts, 5000);
+  // Real comparison, not a placeholder: current2k is the most recent 2k,
+  // pr2k the best-ever — both already computed above, so "how does the
+  // latest one stack up against the PR" is just comparing two numbers
+  // already on screen, never fabricated.
+  const current2kContext =
+    current2k && pr2k
+      ? current2k.totalTimeSeconds - pr2k.totalTimeSeconds <= 0.05
+        ? "Season best"
+        : `+${(current2k.totalTimeSeconds - pr2k.totalTimeSeconds).toFixed(1)}s from PR`
+      : undefined;
   const totalMeters = workouts.reduce((sum, w) => sum + w.totalDistanceMeters, 0);
   const monthCount = workoutsThisMonth(workouts);
 
@@ -106,6 +116,7 @@ export function DashboardCharts({
           value={current2k ? formatDuration(current2k.totalTimeSeconds) : "—"}
           numericValue={current2k?.totalTimeSeconds}
           format={formatDuration}
+          context={current2kContext}
         />
         <StatTile
           icon={<Award className="h-3.5 w-3.5" aria-hidden />}

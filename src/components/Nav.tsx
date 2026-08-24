@@ -48,10 +48,10 @@ export function Nav() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-all duration-150 active:scale-[0.98] sm:px-3 ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-t-md border-b-2 px-2.5 py-1.5 transition-colors duration-150 active:scale-[0.98] sm:px-3 ${
                   active
-                    ? "bg-accent-soft font-medium text-accent-strong"
-                    : "text-muted hover:bg-background hover:text-foreground"
+                    ? "border-accent font-medium text-accent-strong"
+                    : "border-transparent text-muted hover:border-border-strong hover:bg-background hover:text-foreground"
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden />
