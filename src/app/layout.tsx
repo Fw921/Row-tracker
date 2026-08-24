@@ -27,6 +27,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Sky/water atmosphere behind every route — see the comment on
+         * .app-atmosphere in globals.css. No route check needed: "/",
+         * "/login", "/signup" already paint a full-bleed, opaque hero over
+         * this exact spot, so it's simply hidden there rather than
+         * needing to be conditionally skipped. */}
+        <div aria-hidden className="app-atmosphere pointer-events-none fixed inset-x-0 top-0 -z-10 h-[420px]" />
         <Nav />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
         <Toaster position="bottom-right" />
