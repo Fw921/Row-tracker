@@ -7,6 +7,13 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  // Driver adapters + the WASM query compiler mean there is no native,
+  // OS-specific query-engine binary at all — the exact category of bug
+  // that made this deploy so hard to pin down (Vercel's build machine
+  // and its Lambda runtime disagree about "native", so any binary
+  // engine setup risks generating a binary for the wrong platform).
+  // See src/lib/prisma.ts for the accompanying @prisma/adapter-pg setup.
+  engineType = "client"
 }
 
 datasource db {
