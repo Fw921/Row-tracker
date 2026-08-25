@@ -14,7 +14,7 @@ import { Activity, Award, CalendarCheck, Route, TrendingUp, Users } from "lucide
 import { formatCount, formatDate, formatMeters, formatRelativeDate } from "@/lib/format";
 import { formatSplit } from "@/lib/pace";
 import { bucketLabel } from "@/lib/dashboard";
-import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
+import { Badge, Card, Chip, EmptyState, StatGrid, StatTile } from "@/components/ui";
 import { AthleteSheet } from "@/components/AthleteSheet";
 import { Reveal, RevealList, RevealListItem, RevealRow, RevealTableBody } from "@/components/motion/Reveal";
 import {
@@ -57,7 +57,7 @@ export function TeamOverviewCharts({
   return (
     <div className="space-y-8">
       {/* Team overview cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+      <StatGrid className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         <StatTile
           icon={<Users className="h-3.5 w-3.5" aria-hidden />}
           label="Athletes"
@@ -101,7 +101,7 @@ export function TeamOverviewCharts({
           numericValue={overview.prsThisSeason}
           format={formatCount}
         />
-      </div>
+      </StatGrid>
 
       {/* Team performance trend */}
       <Reveal>

@@ -18,7 +18,7 @@ import { formatDuration, formatSplit, classifyPacing } from "@/lib/pace";
 import { PACING_LABELS } from "@/lib/constants";
 import { SplitChart } from "@/components/SplitChart";
 import { DeleteWorkoutButton } from "@/components/DeleteWorkoutButton";
-import { Avatar, Badge, Card, PageHeader, StatTile } from "@/components/ui";
+import { Avatar, Badge, Card, PageHeader, StatGrid, StatTile } from "@/components/ui";
 import { Reveal, RevealList, RevealListItem, RevealRow, RevealTableBody } from "@/components/motion/Reveal";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +74,7 @@ export default async function WorkoutDetailPage({
         <span className="text-sm font-medium">{workout.athlete?.name ?? "Me"}</span>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <StatGrid className="mb-8 grid-cols-2 sm:grid-cols-4">
         <StatTile
           icon={<Route className="h-3.5 w-3.5" aria-hidden />}
           label="Distance"
@@ -131,7 +131,7 @@ export default async function WorkoutDetailPage({
           numericValue={workout.dragFactor}
           format="count"
         />
-      </div>
+      </StatGrid>
 
       {workout.notes && (
         <Card className="mb-8 p-3.5 text-sm leading-relaxed text-foreground">
