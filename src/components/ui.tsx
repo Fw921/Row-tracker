@@ -20,7 +20,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        "rounded-xl border-2 border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-raised)]",
+        "border-2 border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-raised)]",
         className,
       )}
     >
@@ -216,7 +216,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center">
       {icon && (
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
           {icon}
@@ -245,9 +245,34 @@ export function Alert({ children, className }: { children: ReactNode; className?
   );
 }
 
+/** A row of StatTiles fused into one seamless block instead of separate
+ * floating cards — a shared 1px "grout" line between every tile via a
+ * background-color-under-a-gap-px trick (this container paints
+ * --card-border behind everything; each tile paints over it with
+ * --card-bg except for the gap-px sliver), so tiles read as one joined
+ * strip no matter how the responsive column count wraps — no per-
+ * breakpoint divider logic needed. Pass the grid's column classes (e.g.
+ * "grid-cols-2 sm:grid-cols-4") via className; this always supplies its
+ * own gap/border/background. */
+export function StatGrid({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={clsx(
+        "grid gap-px overflow-hidden border-2 border-[var(--card-border)] bg-[var(--card-border)]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 /** A KPI-style tile: icon, label, and a big display-face number. The
  * number is deliberately the loudest thing in the tile — everything else
- * (icon, label, context) is sized and muted to stay out of its way. */
+ * (icon, label, context) is sized and muted to stay out of its way.
+ * Always meant to be composed inside a StatGrid, which supplies the
+ * shared background/border/joined-grid look — rendering one on its own
+ * would just show a plain unbordered block. */
 export function StatTile({
   icon,
   label,
@@ -280,7 +305,7 @@ export function StatTile({
   context?: ReactNode;
 }) {
   return (
-    <Card className="p-3.5 sm:p-4">
+    <div className="bg-[var(--card-bg)] p-3.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--accent)_6%,var(--card-bg))] sm:p-4">
       <div className="mb-2 flex items-center gap-1.5 text-muted">
         {icon && (
           <span
@@ -306,7 +331,7 @@ export function StatTile({
         )}
       </div>
       {context && <div className="mt-1 text-xs text-muted">{context}</div>}
-    </Card>
+    </div>
   );
 }
 
@@ -412,17 +437,18 @@ export function PageHeaderSkeleton({
   );
 }
 
-/** Skeleton for a row of StatTile-shaped cards. */
+/** Skeleton for a row of StatTile-shaped cells — the same joined StatGrid
+ * look as the real thing. */
 export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+    <StatGrid className="grid-cols-2 sm:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
-        <Card key={i} className="p-3.5 sm:p-4">
+        <div key={i} className="bg-[var(--card-bg)] p-3.5 sm:p-4">
           <Skeleton className="mb-2 h-5 w-5 rounded-md" />
           <Skeleton className="h-6 w-16" />
-        </Card>
+        </div>
       ))}
-    </div>
+    </StatGrid>
   );
 }
 

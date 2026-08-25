@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Activity, Award, CalendarRange, Route } from "lucide-react";
 import { formatCount, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration } from "@/lib/pace";
-import { Avatar, Button, Card, EmptyState, Skeleton, StatTile } from "@/components/ui";
+import { Avatar, Button, Card, EmptyState, Skeleton, StatGrid, StatTile } from "@/components/ui";
 import { Sheet, SheetBody, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SplitTrendChart } from "@/components/SplitTrendChart";
 import {
@@ -91,11 +91,13 @@ export function AthleteSheet({
         <SheetBody>
           {loading && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <StatGrid className="grid-cols-2">
                 {Array.from({ length: 4 }, (_, i) => (
-                  <Skeleton key={i} className="h-16 rounded-xl" />
+                  <div key={i} className="bg-[var(--card-bg)] p-3.5">
+                    <Skeleton className="h-9 w-full" />
+                  </div>
                 ))}
-              </div>
+              </StatGrid>
               <Skeleton className="h-48 rounded-xl" />
             </div>
           )}
@@ -110,7 +112,7 @@ export function AthleteSheet({
 
           {!loading && workouts && workouts.length > 0 && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-3">
+              <StatGrid className="grid-cols-2">
                 <StatTile
                   icon={<Award className="h-3.5 w-3.5" aria-hidden />}
                   tone="highlight"
@@ -138,7 +140,7 @@ export function AthleteSheet({
                   label="Last workout"
                   value={recent[0] ? formatRelativeDate(recent[0].date) : "—"}
                 />
-              </div>
+              </StatGrid>
 
               {primaryBucket && (
                 <div>

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { formatCount, formatDate, formatMeters, formatRelativeDate, WORKOUT_TYPE_SHORT } from "@/lib/format";
 import { formatDuration, formatSplit } from "@/lib/pace";
-import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
+import { Badge, Card, Chip, EmptyState, StatGrid, StatTile } from "@/components/ui";
 import { PACING_LABELS } from "@/lib/constants";
 import { GoalsCard } from "@/components/GoalsCard";
 import { SplitTrendChart } from "@/components/SplitTrendChart";
@@ -109,7 +109,7 @@ export function DashboardCharts({
   return (
     <div className="space-y-8">
       {/* 1. Performance overview */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+      <StatGrid className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <StatTile
           icon={<Timer className="h-3.5 w-3.5" aria-hidden />}
           label="Current 2K"
@@ -148,7 +148,7 @@ export function DashboardCharts({
           numericValue={monthCount}
           format={formatCount}
         />
-      </div>
+      </StatGrid>
 
       {/* 2. 2K progress chart — the largest thing on the page */}
       <Reveal>
@@ -207,7 +207,7 @@ export function DashboardCharts({
       {/* 4. Training volume */}
       <Reveal>
         <h2 className="mb-2 font-display text-sm font-semibold text-foreground">Training volume</h2>
-        <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+        <StatGrid className="mb-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
           <StatTile
             icon={<Route className="h-3.5 w-3.5" aria-hidden />}
             label="This week"
@@ -243,7 +243,7 @@ export function DashboardCharts({
             numericValue={volume.workoutCount ? volume.avgWorkoutMeters : undefined}
             format={formatMeters}
           />
-        </div>
+        </StatGrid>
         <Card className="p-4 sm:p-5" interactive>
           <p className="mb-3 text-xs text-muted">Meters per day, this week</p>
           <ResponsiveContainer width="100%" height={180}>

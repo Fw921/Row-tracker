@@ -1,7 +1,7 @@
 "use client";
 
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
-import { Badge, StatTile } from "@/components/ui";
+import { Badge, StatGrid, StatTile } from "@/components/ui";
 
 // Illustrative only, same honesty rule as AuthShowcase's demo panel — a
 // labeled "Sample data" mockup of what the real dashboard looks like once
@@ -26,11 +26,11 @@ export function ProductPreview() {
         </div>
 
         <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-3 gap-3">
+          <StatGrid className="grid-cols-3">
             <StatTile label="2K PR" value="6:52.4" numericValue={412} format="split" />
             <StatTile label="This week" value="18,400m" numericValue={18400} format="meters" />
             <StatTile label="Avg split" value="1:54.2" numericValue={114.2} format="split" />
-          </div>
+          </StatGrid>
 
           <div className="mt-4 h-32 sm:h-40">
             <ResponsiveContainer width="100%" height="100%">

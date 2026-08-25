@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Activity, CircleUser, ClipboardList, Target } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
-import { Avatar, Card, PageHeader, StatTile } from "@/components/ui";
+import { Avatar, Card, PageHeader, StatGrid, StatTile } from "@/components/ui";
 import { ProfileForm } from "@/components/ProfileForm";
 import { LogOutButton } from "@/components/LogOutButton";
 import { formatDate } from "@/lib/format";
@@ -55,7 +55,7 @@ export default async function ProfilePage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
+        <StatGrid className="grid-cols-3 lg:grid-cols-1">
           <StatTile
             icon={<Activity className="h-4 w-4" aria-hidden />}
             label="Workouts logged"
@@ -77,7 +77,7 @@ export default async function ProfilePage() {
             numericValue={goalCount}
             format="count"
           />
-        </div>
+        </StatGrid>
       </div>
     </div>
   );
