@@ -52,7 +52,7 @@ export function PageHeader({
           </span>
         )}
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
             {title}
           </h1>
           {description && <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{description}</p>}
@@ -294,7 +294,7 @@ export function StatTile({
         )}
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className="tabular font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      <div className="tabular font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         {numericValue != null && format ? (
           typeof format === "string" ? (
             <CountUpStat value={numericValue} kind={format} />

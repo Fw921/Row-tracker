@@ -70,7 +70,7 @@ export function WelcomeHero() {
         </div>
 
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-          <h1 className="max-w-2xl font-display text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+          <h1 className="max-w-2xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
             Where training becomes data, and data becomes speed.
           </h1>
           <p className="mt-4 max-w-md text-balance text-base leading-relaxed text-white/75">

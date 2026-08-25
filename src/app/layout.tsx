@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { Nav } from "@/components/Nav";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// One font family for the whole app -- Manrope's variable weight range
+// (200-800) covers body copy and display headings both, so there's no need
+// for a second display-only font the way Space Grotesk was paired with
+// Inter before.
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex">
         {/* Sky/water atmosphere behind every route — see the comment on

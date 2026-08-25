@@ -98,8 +98,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-space-grotesk);
+  /* One font family, both utilities — font-display used to be Space
+   * Grotesk's distinct look; now it's the same Manrope as font-sans, just
+   * with the tighter tracking below for display sizes. Kept as two theme
+   * keys (not a single rename) so no call site needs touching. */
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-manrope);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -176,8 +180,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Manrope's default tracking reads a little loose at display sizes
+ * (headlines, StatTile numbers) — tightened here rather than at each call
+ * site so every font-display usage stays in sync. */
 .font-display {
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
