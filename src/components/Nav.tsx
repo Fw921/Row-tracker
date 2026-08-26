@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, History, Trophy, ClipboardList, Ship, Upload, Plus, Sailboat, CircleUser } from "lucide-react";
+import { History, Trophy, ClipboardList, Ship, Upload, Plus, Sailboat, CircleUser } from "lucide-react";
 import { Button } from "@/components/ui";
+import { DashboardIcon } from "@/components/icons/DashboardIcon";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
   { href: "/history", label: "History", icon: History },
   { href: "/team", label: "Team", icon: Trophy },
   { href: "/roster", label: "Roster", icon: ClipboardList },
