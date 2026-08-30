@@ -385,20 +385,30 @@ export function Field({
   );
 }
 
-/** Small rounded chip button, e.g. distance presets. */
+/** Small rounded chip button, e.g. distance presets. Pass `bare` when
+ * rendering inside a `ChipGroup` (src/components/motion/ChipGroup.tsx) —
+ * the group's own sliding pill provides the fill, so the chip itself only
+ * needs a text-color state. `data-active` is what ChipGroup reads to find
+ * which chip to slide the pill under. */
 export function Chip({
   active,
+  bare,
   className,
   ...props
-}: { active?: boolean; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: { active?: boolean; bare?: boolean; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
+      data-active={active ? "true" : undefined}
       className={clsx(
-        `cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all duration-150 ${PRESS_SCALE} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
-        active
-          ? "border-accent bg-accent-soft text-accent-strong"
-          : "border-border text-muted hover:border-border-strong hover:bg-background",
+        `relative z-[1] cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 ${PRESS_SCALE} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`,
+        bare
+          ? active
+            ? "border-transparent text-accent-strong"
+            : "border-transparent text-muted hover:text-foreground"
+          : active
+            ? "border-accent bg-accent-soft text-accent-strong"
+            : "border-border text-muted hover:border-border-strong hover:bg-background",
         className,
       )}
       {...props}
