@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Alert, Avatar, Button, Card, EmptyState, IconButton, Select, inputClass } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { RevealList, RevealListItem } from "@/components/motion/Reveal";
+import { useShakeOnError } from "@/lib/useShakeOnError";
 import { SIDE_INFO } from "@/lib/boats";
 import type { RowingSide } from "@/generated/prisma/enums";
 
@@ -19,6 +20,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const nameInputRef = useShakeOnError<HTMLInputElement>(error);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -76,6 +78,7 @@ export function RosterManager({ athletes }: { athletes: Athlete[] }) {
       <Card className="p-4">
         <form onSubmit={handleAdd} className="flex gap-2">
           <input
+            ref={nameInputRef}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}

@@ -17,6 +17,7 @@ import { bucketLabel } from "@/lib/dashboard";
 import { Badge, Card, Chip, EmptyState, StatTile } from "@/components/ui";
 import { AthleteSheet } from "@/components/AthleteSheet";
 import { Reveal, RevealList, RevealListItem, RevealRow, RevealTableBody } from "@/components/motion/Reveal";
+import { ChipGroup } from "@/components/motion/ChipGroup";
 import {
   distinctTeamBuckets,
   teamOverview,
@@ -112,13 +113,13 @@ export function TeamOverviewCharts({
               <p className="text-xs text-muted">Average split across everyone in each team piece</p>
             </div>
             {buckets.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5">
+              <ChipGroup>
                 {buckets.map((b) => (
-                  <Chip key={b} active={bucket === b} onClick={() => setBucket(b)}>
+                  <Chip key={b} bare active={bucket === b} onClick={() => setBucket(b)}>
                     {bucketLabel(b)}
                   </Chip>
                 ))}
-              </div>
+              </ChipGroup>
             )}
           </div>
           {chartData.length > 0 ? (

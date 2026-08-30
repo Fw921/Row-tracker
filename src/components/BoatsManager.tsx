@@ -7,6 +7,7 @@ import { Copy, Sailboat } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, Badge, Button, Card, EmptyState, Field, IconButton, Select, inputClass } from "@/components/ui";
 import { RevealList, RevealListItem } from "@/components/motion/Reveal";
+import { useShakeOnError } from "@/lib/useShakeOnError";
 import { BOAT_CLASS_INFO, BOAT_CLASSES, COX_SEAT_INDEX } from "@/lib/boats";
 import type { BoatClass } from "@/generated/prisma/enums";
 
@@ -25,6 +26,7 @@ export function BoatsManager({ boats }: { boats: Boat[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useShakeOnError<HTMLFormElement>(error);
 
   async function createBoat(input: { name?: string; boatClass: BoatClass; copyFromBoatId?: string }) {
     const res = await fetch("/api/boats", {
@@ -84,7 +86,7 @@ export function BoatsManager({ boats }: { boats: Boat[] }) {
   return (
     <div className="max-w-2xl space-y-6">
       <Card className="p-4">
-        <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-3">
+        <form ref={formRef} onSubmit={handleCreate} className="flex flex-wrap items-end gap-3">
           <div className="min-w-[10rem] flex-1">
             <Field label="Name" hint="optional">
               <input
